@@ -13,10 +13,12 @@ namespace MegaDTelegramRemoteControl.Services
     public class TelegramLogic : ITelegramLogic
     {
         private readonly HomeConfig homeConfig;
+        private readonly IDeviceConnector deviceConnector;
 
-        public TelegramLogic(HomeConfig homeConfig)
+        public TelegramLogic(HomeConfig homeConfig, IDeviceConnector deviceConnector)
         {
             this.homeConfig = homeConfig;
+            this.deviceConnector = deviceConnector;
         }
 
         public Task<OperationResult<TelegramBotMenu>> GetTelegramBotMenuAsync(string currentId = null)
@@ -26,7 +28,7 @@ namespace MegaDTelegramRemoteControl.Services
                 if (string.IsNullOrEmpty(currentId))
                     return GetDefaultMenu();
                 
-                return GetMenuById(homeConfig.Locations, currentId) ?? GetDefaultMenu();
+                return await GetMenuByIdAsync(homeConfig.Locations, currentId) ?? GetDefaultMenu();
             });
         }
 
@@ -46,7 +48,7 @@ namespace MegaDTelegramRemoteControl.Services
             return result;
         }
 
-        private TelegramBotMenu GetMenuById(IEnumerable<Location> locations, string id)
+        private async Task<TelegramBotMenu> GetMenuByIdAsync(IEnumerable<Location> locations, string id)
         {
             foreach (var location in locations)
             {
@@ -69,11 +71,17 @@ namespace MegaDTelegramRemoteControl.Services
 
                     foreach (var items in location.Items.Where(x => x.Port.Type == DevicePortType.OUT))
                     {
-                        result.Buttons.Add(new ButtonItem
-                                           {
-                                               Id = items.Id,
-                                               Name = items.Port.Name,
-                                           });
+                        var item = new ButtonItem
+                                   {
+                                       Id = items.Id,
+                                       Name = items.Port.Name,
+                                   };
+                        
+                        var status = await deviceConnector.GetPortStatusAsync(items.Port);
+                        if (status.IsSuccess)
+                            item.Name += $": {status.Data}";
+                        
+                        result.Buttons.Add(item);
                     }
                     
                     AppendNavigationButtons(location, result);
@@ -81,7 +89,7 @@ namespace MegaDTelegramRemoteControl.Services
                     return result;
                 }
 
-                var subLocationResult = GetMenuById(location.SubLocations, id);
+                var subLocationResult = await GetMenuByIdAsync(location.SubLocations, id);
                 if (subLocationResult != null)
                     return subLocationResult;
             }

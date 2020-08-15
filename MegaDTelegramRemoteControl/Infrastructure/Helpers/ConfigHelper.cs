@@ -44,8 +44,11 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Helpers
                     {
                         deviceModel.Ports[port.Id] = new DevicePort
                                                      {
+                                                         Id = port.Id,
                                                          Name = port.Name,
                                                          Type = port.Type,
+                                                         OutMode = port.OutMode,
+                                                         Device = deviceModel,
                                                      };
                     }
                 }

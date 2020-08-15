@@ -26,6 +26,7 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Configurations
         public string Id { get; set; }
         public DevicePortType Type { get; set; }
         public string Name { get; set; }
+        public DeviceOutPortMode? OutMode { get; set; }
     }
 
     public enum DevicePortType
@@ -43,5 +44,13 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Configurations
         PR,
         R,
         C,
+    }
+
+    public enum DeviceOutPortMode
+    {
+        SW,
+        PWM,
+        SWLink,
+        DS2413,
     }
 }
