@@ -78,6 +78,7 @@ namespace MegaDTelegramRemoteControl
             
             services.AddSingleton<ITelegramService, TelegramService>();
             services.AddTransient<IDeviceEventParser, DeviceEventParser>();
+            services.AddTransient<IDevicePortStatusParser, DevicePortStatusParser>();
             services.AddTransient<IHomeLogic, HomeLogic>();
             services.AddTransient<ITelegramLogic, TelegramLogic>();
             services.AddHttpClient<IDeviceConnector, DeviceConnector>();

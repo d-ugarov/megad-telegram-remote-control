@@ -1,5 +1,4 @@
-﻿using MegaDTelegramRemoteControl.Infrastructure.Configurations;
-using MegaDTelegramRemoteControl.Infrastructure.Models;
+﻿using MegaDTelegramRemoteControl.Infrastructure.Models;
 using MegaDTelegramRemoteControl.Models.Device;
 using MegaDTelegramRemoteControl.Services.Interfaces;
 using System;
@@ -14,10 +13,12 @@ namespace MegaDTelegramRemoteControl.Services
     public class DeviceConnector : IDeviceConnector
     {
         private readonly HttpClient httpClient;
+        private readonly IDevicePortStatusParser portStatusParser;
         
-        public DeviceConnector(HttpClient httpClient)
+        public DeviceConnector(HttpClient httpClient, IDevicePortStatusParser portStatusParser)
         {
             this.httpClient = httpClient;
+            this.portStatusParser = portStatusParser;
         }
 
         public Task<OperationResult<DevicePortStatus>> GetPortStatusAsync(DevicePort port)
@@ -26,20 +27,8 @@ namespace MegaDTelegramRemoteControl.Services
             {
                 var query = $"?pt={port.Id}&cmd=get";
                 var data = await SendRequestAsync(port.Device, query);
-                
-                var result = new DevicePortStatus
-                             {
-                                 Port = port,
-                             };
 
-                switch (port.OutMode)
-                {
-                    case DeviceOutPortMode.SW:
-                        result.SWStatus = Enum.Parse<SWStatus>(data, true);
-                        break;
-                }
-
-                return result;
+                return portStatusParser.ParseStatus(port, data);
             });
         }
 
