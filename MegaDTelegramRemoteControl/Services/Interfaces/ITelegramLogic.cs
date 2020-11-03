@@ -6,6 +6,6 @@ namespace MegaDTelegramRemoteControl.Services.Interfaces
 {
     public interface ITelegramLogic
     {
-        Task<OperationResult<TelegramBotMenu>> GetTelegramBotMenuAsync(string currentId = null);
+        Task<OperationResult<TelegramBotMenu>> ProcessTelegramActionAsync(string actionId = null);
     }
 }

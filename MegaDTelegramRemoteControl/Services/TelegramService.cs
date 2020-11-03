@@ -86,7 +86,7 @@ namespace MegaDTelegramRemoteControl.Services
                 case "dashboard":
                 default:
                 {
-                    var mainMenu = await telegramLogic.GetTelegramBotMenuAsync();
+                    var mainMenu = await telegramLogic.ProcessTelegramActionAsync();
                     mainMenu.EnsureSuccess();
 
                     var (text, inlineKeyboard) = GetFormattedAnswer(mainMenu.Data);
@@ -111,6 +111,8 @@ namespace MegaDTelegramRemoteControl.Services
                 
                 if (!allowed)
                     return;
+
+                await bot.AnswerCallbackQueryAsync(e.CallbackQuery.Id);
                 
                 await ProcessCallbackQueryAsync(e.CallbackQuery);
             });
@@ -118,11 +120,13 @@ namespace MegaDTelegramRemoteControl.Services
 
         private async Task ProcessCallbackQueryAsync(CallbackQuery callbackQuery)
         {
-            var menu = await telegramLogic.GetTelegramBotMenuAsync(callbackQuery.Data);
-            var chatId = new ChatId(callbackQuery.Message.Chat.Id);
-            var (text, inlineKeyboard1) = GetFormattedAnswer(menu.Data);
+            var menu = await telegramLogic.ProcessTelegramActionAsync(callbackQuery.Data);
+            menu.EnsureSuccess();
             
-            await EditMessageAsync(text, inlineKeyboard1, chatId, callbackQuery.Message);
+            var chatId = new ChatId(callbackQuery.Message.Chat.Id);
+            var (text, inlineKeyboard) = GetFormattedAnswer(menu.Data);
+            
+            await EditMessageAsync(text, inlineKeyboard, chatId, callbackQuery.Message);
         }
         
         private static (string text, InlineKeyboardMarkup inlineKeyboard) GetFormattedAnswer(TelegramBotMenu menu)

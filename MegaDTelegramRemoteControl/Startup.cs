@@ -7,6 +7,7 @@ using MegaDTelegramRemoteControl.Infrastructure.Models;
 using MegaDTelegramRemoteControl.Infrastructure.Services;
 using MegaDTelegramRemoteControl.Services;
 using MegaDTelegramRemoteControl.Services.Interfaces;
+using MegaDTelegramRemoteControl.Services.TestServices;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -14,13 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.PlatformAbstractions;
-using NLog;
-using System.Diagnostics;
-using System.IO;
 using System.Net;
-using System.Reflection;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace MegaDTelegramRemoteControl
 {
@@ -55,10 +50,10 @@ namespace MegaDTelegramRemoteControl
                     });
             
             ConfigureCustomServices(services);
-            ConfigureConstants(services);
+            ConfigureConfigs(services);
         }
 
-        private void ConfigureConstants(IServiceCollection services)
+        private void ConfigureConfigs(IServiceCollection services)
         {
             var deviceConfig = Configuration.GetSection(nameof(DevicesConfig)).Get<DevicesConfig>();
             var homeMapConfig = Configuration.GetSection(nameof(HomeMapConfig)).Get<HomeMapConfig>();
@@ -74,6 +69,8 @@ namespace MegaDTelegramRemoteControl
 
         private void ConfigureCustomServices(IServiceCollection services)
         {
+            var platformConfig = Configuration.GetSection(nameof(PlatformConfig)).Get<PlatformConfig>();
+            
             services.AddSingleton(x => new StartupLogger(x.GetRequiredService<ILogger<StartupLogger>>()));
             
             services.AddSingleton<ITelegramService, TelegramService>();
@@ -81,7 +78,11 @@ namespace MegaDTelegramRemoteControl
             services.AddTransient<IDevicePortStatusParser, DevicePortStatusParser>();
             services.AddTransient<IHomeLogic, HomeLogic>();
             services.AddTransient<ITelegramLogic, TelegramLogic>();
-            services.AddHttpClient<IDeviceConnector, DeviceConnector>();
+
+            if (!platformConfig.UseFakeDeviceConnector)
+                services.AddHttpClient<IDeviceConnector, DeviceConnector>();
+            else
+                services.AddTransient<IDeviceConnector, FakeDeviceConnector>();
             
             services.AddHostedService<InitService>();
             services.AddHostedService<JobScheduler>();
