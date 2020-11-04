@@ -1,4 +1,5 @@
 ﻿using MegaDTelegramRemoteControl.Infrastructure.Configurations;
+using System.Collections.Generic;
 
 namespace MegaDTelegramRemoteControl.Models.Device
 {
@@ -8,6 +9,7 @@ namespace MegaDTelegramRemoteControl.Models.Device
         public DevicePortType Type { get; set; }
         public string Name { get; set; }
         public DeviceOutPortMode? OutMode { get; set; }
+        public Dictionary<string, string> OutModeIcons { get; set; }
         
         public Device Device { get; set; }
     }

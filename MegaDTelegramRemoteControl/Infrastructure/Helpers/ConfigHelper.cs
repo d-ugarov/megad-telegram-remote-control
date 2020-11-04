@@ -48,6 +48,7 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Helpers
                                                          Name = port.Name,
                                                          Type = port.Type,
                                                          OutMode = port.OutMode,
+                                                         OutModeIcons = port.OutModeIcons,
                                                          Device = deviceModel,
                                                      };
                     }

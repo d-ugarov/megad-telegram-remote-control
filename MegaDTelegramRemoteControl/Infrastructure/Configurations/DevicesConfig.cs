@@ -27,6 +27,7 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Configurations
         public DevicePortType Type { get; set; }
         public string Name { get; set; }
         public DeviceOutPortMode? OutMode { get; set; }
+        public Dictionary<string, string> OutModeIcons { get; set; }
     }
 
     public enum DevicePortType

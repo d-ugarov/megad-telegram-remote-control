@@ -26,9 +26,9 @@ namespace MegaDTelegramRemoteControl.Services.TestServices
                 generator.GetBytes(bytes);
 
                 var rand = BitConverter.ToInt64(bytes, 0);
-                var data = rand % 2 == 0 ? "On" : "Off";
+                var data = rand % 2 == 0 ? SWStatus.On : SWStatus.Off;
 
-                return portStatusParser.ParseStatus(port, data);
+                return portStatusParser.ParseStatus(port, data.ToString());
             }));
         }
     }

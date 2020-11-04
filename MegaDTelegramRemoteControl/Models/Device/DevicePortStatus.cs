@@ -1,5 +1,4 @@
 ﻿using MegaDTelegramRemoteControl.Infrastructure.Configurations;
-using System;
 
 namespace MegaDTelegramRemoteControl.Models.Device
 {
@@ -13,7 +12,13 @@ namespace MegaDTelegramRemoteControl.Models.Device
             switch (Port.OutMode)
             {
                 case DeviceOutPortMode.SW:
-                    return SWStatus.ToString();
+                {
+                    if (Port.OutModeIcons != null &&
+                        Port.OutModeIcons.TryGetValue(SWStatus.ToString(), out var icon))
+                        return icon;
+
+                    return $"[{SWStatus}]";
+                }
             }
 
             return "";

@@ -11,14 +11,18 @@ namespace MegaDTelegramRemoteControl.Services
     {
         private interface IStatusParser
         {
-            DevicePortStatus Parse(string data);
+            DevicePortStatus Parse(DevicePort devicePort, string portStatus);
         }
 
         private class SwStatusParser : IStatusParser
         {
-            public DevicePortStatus Parse(string data)
+            public DevicePortStatus Parse(DevicePort devicePort, string portStatus)
             {
-                return new DevicePortStatus {SWStatus = Enum.Parse<SWStatus>(data, true)};
+                return new DevicePortStatus
+                       {
+                           SWStatus = Enum.Parse<SWStatus>(portStatus, true),
+                           Port = devicePort,
+                       };
             }
         }
 
@@ -32,16 +36,12 @@ namespace MegaDTelegramRemoteControl.Services
                       };
         }
         
-        public DevicePortStatus ParseStatus(DevicePort port, string data)
+        public DevicePortStatus ParseStatus(DevicePort port, string portStatus)
         {
             if (!parsers.TryGetValue(port.OutMode ?? default, out var parser))
                 throw new Exception($"Port type {port.OutMode} not supported");
-
-            var result = parser.Parse(data);
-
-            result.Port = port;
-
-            return result;
+            
+            return parser.Parse(port, portStatus);
         }
     }
 }
