@@ -1,7 +1,8 @@
-﻿using MegaDTelegramRemoteControl.Models.Device;
-using System;
+﻿using MegaDTelegramRemoteControl.Infrastructure.Helpers;
+using MegaDTelegramRemoteControl.Models.Device;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace MegaDTelegramRemoteControl.Models
 {
@@ -9,26 +10,56 @@ namespace MegaDTelegramRemoteControl.Models
     {
         public Dictionary<string, Device.Device> Devices { get; set; }
         public List<Location> Locations { get; set; }
-
+        
         public override string ToString()
         {
-            static IEnumerable<string> LocationsLog(IEnumerable<Location> locations) =>
-                locations.Select(x =>
-                    $"'{x.Name}'. " +
-                    $"Items: {(x.Items.Any() ? string.Join(", ", x.Items.Select(p => p.Port.Name)) : "-")}, " +
-                    $"Locations: {(x.SubLocations.Any() ? string.Join(", ", LocationsLog(x.SubLocations)) : "-")}");
+            var log = new StringBuilder();
+            
+            void LogLocations(Location tempLocation, int offset = 0)
+            {
+                log.AppendLine($"{Extensions.GetWhitespaces(offset + 2)}" +
+                               $"[{tempLocation.Name}]");
 
-            var devices = string.Join(Environment.NewLine,
-                Devices.Select(x =>
-                    $"{x.Key}: {x.Value.Name}, {x.Value.Ip}, " +
-                    $"ports: {string.Join(", ", x.Value.Ports.Select(p => $"{p.Key} {p.Value.Type} '{p.Value.Name}'"))}"));
-            var locations = string.Join(Environment.NewLine, LocationsLog(Locations));
+                log.AppendLine($"{Extensions.GetWhitespaces(offset + 3)}" +
+                               $"Items: {(tempLocation.Items.Any() ? "" : "-")}");
 
-            return $"HomeConfig:{Environment.NewLine}" +
-                   $"Devices:{Environment.NewLine}" +
-                   $"{devices}{Environment.NewLine}" +
-                   $"Locations:{Environment.NewLine}" +
-                   $"{locations}";
+                foreach (var item in tempLocation.Items)
+                {
+                    log.AppendLine($"{Extensions.GetWhitespaces(offset + 4)}" +
+                                   $"[{item.Port.Name}] Device {item.Device.Name}, Port {item.Port.Id}");
+                }
+
+                log.AppendLine($"{Extensions.GetWhitespaces(offset + 3)}" +
+                               $"SubLocations: {(tempLocation.SubLocations.Any() ? "" : "-")}");
+
+                foreach (var subLocation in tempLocation.SubLocations)
+                {
+                    LogLocations(subLocation, offset + 2);
+                }
+            }
+            
+            log.AppendLine("HomeConfig:");
+
+            log.AppendLine($"{Extensions.GetWhitespaces(1)}Devices:");
+            foreach (var (deviceKey, device) in Devices)
+            {
+                log.AppendLine($"{Extensions.GetWhitespaces(2)}" +
+                               $"[{deviceKey}] {device.Name}, {device.Ip}, ports: {(device.Ports.Any() ? "" : "-")}");
+
+                foreach (var (portKey, port) in device.Ports)
+                {
+                    log.AppendLine($"{Extensions.GetWhitespaces(3)}" +
+                                   $"[{portKey}] {port.Type} '{port.Name}'");
+                }
+            }
+
+            log.AppendLine($"{Extensions.GetWhitespaces(1)}Locations:");
+            foreach (var location in Locations)
+            {
+                LogLocations(location);
+            }
+            
+            return log.ToString();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using MegaDTelegramRemoteControl.Infrastructure.Configurations;
 using MegaDTelegramRemoteControl.Models;
+using System;
 using System.Collections.Generic;
 using Device = MegaDTelegramRemoteControl.Models.Device.Device;
 using DevicePort = MegaDTelegramRemoteControl.Models.Device.DevicePort;
@@ -63,18 +64,21 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Helpers
             if (homeMapConfig?.Locations == null) 
                 return;
             
+            var itemIds = new HashSet<Guid>();
+            
             foreach (var location in homeMapConfig.Locations)
             {
-                result.Locations.Add(CreateLocation(location, result.Devices));
+                result.Locations.Add(CreateLocation(location, result.Devices, itemIds));
             }
         }
 
-        private static Location CreateLocation(Configurations.Location location, IReadOnlyDictionary<string, Device> devices, Location parent = null)
+        private static Location CreateLocation(Configurations.Location location, IReadOnlyDictionary<string, Device> devices, 
+            ISet<Guid> itemIds, Location parent = null)
         {
             var locationModel = new Location
                                 {
                                     Name = location.Name,
-                                    Id = $"{parent?.Id}{location.Name.GetHashCode()}",
+                                    Id = GetItemId(parent?.Id, location.Name, itemIds),
                                     Items = new List<LocationItems>(),
                                     SubLocations = new List<Location>(),
                                     Parent = parent,
@@ -89,7 +93,7 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Helpers
                     {
                         locationModel.Items.Add(new LocationItems
                                                 {
-                                                    Id = $"{parent?.Id}{port.Name.GetHashCode()}",
+                                                    Id = GetItemId(parent?.Id, port.Name, itemIds),
                                                     Device = device,
                                                     Port = port,
                                                 });
@@ -101,11 +105,27 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Helpers
             {
                 foreach (var subLocation in location.SubLocations)
                 {
-                    locationModel.SubLocations.Add(CreateLocation(subLocation, devices, locationModel));
+                    locationModel.SubLocations.Add(CreateLocation(subLocation, devices, itemIds, locationModel));
                 }
             }
 
             return locationModel;
+        }
+
+        private static string GetItemId(string parentId, string itemName, ISet<Guid> itemIds)
+        {
+            Guid id;
+            var counter = 0;
+            
+            do
+            {
+                id = GuidHelper.Create(GuidHelper.IsoOidNamespace, $"{parentId}{itemName}{counter}");
+                counter++;
+                
+            } while (itemIds.Contains(id));
+            
+            itemIds.Add(id);
+            return id.ToString();
         }
     }
 }

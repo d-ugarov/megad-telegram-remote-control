@@ -4,7 +4,6 @@ using MegaDTelegramRemoteControl.Infrastructure.Jobs.Configurations;
 using MegaDTelegramRemoteControl.Infrastructure.Jobs.Services;
 using MegaDTelegramRemoteControl.Infrastructure.Middlewares;
 using MegaDTelegramRemoteControl.Infrastructure.Models;
-using MegaDTelegramRemoteControl.Infrastructure.Services;
 using MegaDTelegramRemoteControl.Services;
 using MegaDTelegramRemoteControl.Services.Interfaces;
 using MegaDTelegramRemoteControl.Services.TestServices;
@@ -14,7 +13,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using NLog;
 using System.Net;
 
 namespace MegaDTelegramRemoteControl
@@ -59,8 +58,7 @@ namespace MegaDTelegramRemoteControl
             var homeMapConfig = Configuration.GetSection(nameof(HomeMapConfig)).Get<HomeMapConfig>();
             var homeConfig = ConfigHelper.MakeConfig(deviceConfig, homeMapConfig);
             
-            var logger = services.BuildServiceProvider().GetRequiredService<StartupLogger>();
-            logger.Log(homeConfig.ToString());
+            LogManager.GetCurrentClassLogger().Info(homeConfig.ToString());
             services.AddSingleton(_ => homeConfig);
             
             services.AddSingleton(_ => Configuration.GetSection(nameof(TelegramConfig)).Get<TelegramConfig>());
@@ -70,8 +68,6 @@ namespace MegaDTelegramRemoteControl
         private void ConfigureCustomServices(IServiceCollection services)
         {
             var platformConfig = Configuration.GetSection(nameof(PlatformConfig)).Get<PlatformConfig>();
-            
-            services.AddSingleton(x => new StartupLogger(x.GetRequiredService<ILogger<StartupLogger>>()));
             
             services.AddSingleton<ITelegramService, TelegramService>();
             services.AddTransient<IDeviceEventParser, DeviceEventParser>();

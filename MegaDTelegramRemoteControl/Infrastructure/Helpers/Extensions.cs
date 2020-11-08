@@ -57,5 +57,7 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Helpers
             var memberInfo = type.GetMember(value.ToString());
             return memberInfo[0].GetCustomAttributes(typeof(T), false);
         }
+
+        public static string GetWhitespaces(int count = 1) => new string(' ', Math.Max(0, count * 4));
     }
 }
