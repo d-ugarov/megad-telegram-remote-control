@@ -3,6 +3,7 @@
     public class LocationItems
     {
         public string Id { get; set; }
+        public string CustomName { get; set; }
         public Device Device { get; set; }
         public DevicePort Port { get; set; }
     }

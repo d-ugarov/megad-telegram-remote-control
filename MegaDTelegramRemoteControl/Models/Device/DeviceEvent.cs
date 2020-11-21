@@ -1,5 +1,4 @@
 ﻿using MegaDTelegramRemoteControl.Infrastructure.Models;
-using System;
 using System.Text;
 
 namespace MegaDTelegramRemoteControl.Models.Device
@@ -12,13 +11,11 @@ namespace MegaDTelegramRemoteControl.Models.Device
         
         public DeviceEventType Type { get; set; }
         
-        public DateTime Date { get; set; }
-        
         public bool IsParsedSuccessfully { get; set; }
         
         public Device Device { get; set; }
 
-        public DevicePortEvent Port
+        public DevicePortEvent Event
         {
             get => Type == DeviceEventType.PortEvent
                 ? port
@@ -33,10 +30,10 @@ namespace MegaDTelegramRemoteControl.Models.Device
             if (Device != null)
                 str.Append($", device: {Device.Name}");
 
-            if (port.Port == null)
-                str.Append($", {port.Port}");
+            if (port.Port != null)
+                str.Append($", {port}");
 
-            str.Append(IsParsedSuccessfully ? ", +" : ", -");
+            str.Append(IsParsedSuccessfully ? " (ok)" : " (error)");
 
             return str.ToString();
         }

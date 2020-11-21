@@ -26,7 +26,7 @@ namespace MegaDTelegramRemoteControl.Models
                 foreach (var item in tempLocation.Items)
                 {
                     log.AppendLine($"{Extensions.GetWhitespaces(offset + 4)}" +
-                                   $"[{item.Port.Name}] Device {item.Device.Name}, Port {item.Port.Id}");
+                                   $"[{item.CustomName ?? item.Port.Name}] Device {item.Device.Name}, Port {item.Port.Id}");
                 }
 
                 log.AppendLine($"{Extensions.GetWhitespaces(offset + 3)}" +

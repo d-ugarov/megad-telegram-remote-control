@@ -29,7 +29,6 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Middlewares
 
             logger.LogDebug($"{id} Started " +
                             $"| Url: {context.Request.GetDisplayUrl()} " +
-                            (context.Request.QueryString.HasValue ? $"| Query: {context.Request.QueryString} " : "") +
                             $"| IP: {ip}");
 
             await next(context);

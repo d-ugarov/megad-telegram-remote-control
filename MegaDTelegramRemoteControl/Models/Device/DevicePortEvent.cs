@@ -1,5 +1,6 @@
 ﻿using MegaDTelegramRemoteControl.Infrastructure.Configurations;
 using MegaDTelegramRemoteControl.Infrastructure.Models;
+using System;
 using System.Text;
 
 namespace MegaDTelegramRemoteControl.Models.Device
@@ -10,6 +11,8 @@ namespace MegaDTelegramRemoteControl.Models.Device
         private DevicePortOutEvent outPortData;
         
         public DevicePort Port { get; set; }
+        
+        public DateTime Date { get; set; }
 
         public DevicePortInEvent In
         {

@@ -96,6 +96,7 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Helpers
                                                     Id = GetItemId(parent?.Id, port.Name, itemIds),
                                                     Device = device,
                                                     Port = port,
+                                                    CustomName = locationItem.CustomName,
                                                 });
                     }
                 }

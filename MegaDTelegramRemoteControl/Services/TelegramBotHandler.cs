@@ -110,7 +110,7 @@ namespace MegaDTelegramRemoteControl.Services
                 var item = new ButtonItem
                            {
                                Id = items.Id,
-                               Name = items.Port.Name,
+                               Name = items.CustomName ?? items.Port.Name,
                            };
 
                 var status = await deviceConnector.GetPortStatusAsync(items.Port);

@@ -20,5 +20,6 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Configurations
     {
         public string DeviceId { get; set; }
         public string PortId { get; set; }
+        public string CustomName { get; set; }
     }
 }

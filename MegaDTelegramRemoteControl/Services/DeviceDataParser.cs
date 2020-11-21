@@ -65,7 +65,6 @@ namespace MegaDTelegramRemoteControl.Services
 
             var result = new DeviceEvent
                          {
-                             Date = DateTime.UtcNow,
                              Device = device,
                          };
 
@@ -79,7 +78,7 @@ namespace MegaDTelegramRemoteControl.Services
                     if (!TryGetDevicePort(portId, result))
                         return result;
 
-                    switch (result.Port.Port.Type)
+                    switch (result.Event.Port.Type)
                     {
                         case DevicePortType.IN:
                         {
@@ -124,14 +123,14 @@ namespace MegaDTelegramRemoteControl.Services
         {
             if (!result.Device.Ports.TryGetValue(portId, out var port)) 
                 return false;
-            
-            result.Port = new DevicePortEvent {Port = port};
+
+            result.Event = new DevicePortEvent {Port = port, Date = DateTime.UtcNow};
             return true;
         }
 
         private static void ParseInPort(IEnumerable<(string key, string value)> query, DeviceEvent result)
         {
-            result.Port.In = new DevicePortInEvent
+            result.Event.In = new DevicePortInEvent
                              {
                                  Command = DeviceInPortCommand.KeyPressed,
                              };
@@ -144,11 +143,11 @@ namespace MegaDTelegramRemoteControl.Services
                     {
                         if (int.TryParse(value, out var type))
                         {
-                            result.Port.In.Command = type switch
+                            result.Event.In.Command = type switch
                             {
                                 1 => DeviceInPortCommand.KeyReleased,
                                 2 => DeviceInPortCommand.LongClick,
-                                _ => result.Port.In.Command
+                                _ => result.Event.In.Command
                             };
                         }
                         break;
@@ -157,11 +156,11 @@ namespace MegaDTelegramRemoteControl.Services
                     {
                         if (int.TryParse(value, out var type))
                         {
-                            result.Port.In.Command = type switch
+                            result.Event.In.Command = type switch
                             {
                                 1 => DeviceInPortCommand.Click,
                                 2 => DeviceInPortCommand.DoubleClick,
-                                _ => result.Port.In.Command
+                                _ => result.Event.In.Command
                             };
                         }
                         break;
@@ -169,7 +168,7 @@ namespace MegaDTelegramRemoteControl.Services
                     case "cnt":
                     {
                         if (int.TryParse(value, out var counter))
-                            result.Port.In.Counter = counter;
+                            result.Event.In.Counter = counter;
                         break;
                     }
                 }
@@ -178,7 +177,7 @@ namespace MegaDTelegramRemoteControl.Services
 
         private static void ParseOutPort(IEnumerable<(string key, string value)> query, DeviceEvent result)
         {
-            result.Port.Out = new DevicePortOutEvent
+            result.Event.Out = new DevicePortOutEvent
                               {
                                   Command = DeviceOutPortCommand.Unknown,
                               };
@@ -192,7 +191,7 @@ namespace MegaDTelegramRemoteControl.Services
                         if (int.TryParse(value, out var cmd) &&
                             Enum.IsDefined(typeof(DeviceOutPortCommand), cmd))
                         {
-                            result.Port.Out.Command = (DeviceOutPortCommand)cmd;
+                            result.Event.Out.Command = (DeviceOutPortCommand)cmd;
                         }
                         break;
                     }
