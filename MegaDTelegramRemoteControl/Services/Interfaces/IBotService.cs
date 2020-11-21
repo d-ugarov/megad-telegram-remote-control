@@ -2,7 +2,7 @@
 
 namespace MegaDTelegramRemoteControl.Services.Interfaces
 {
-    public interface ITelegramService
+    public interface IBotService
     {
         Task InitBotAsync();
         

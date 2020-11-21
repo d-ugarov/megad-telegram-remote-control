@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 
 namespace MegaDTelegramRemoteControl.Services.Interfaces
 {
-    public interface ITelegramLogic
+    public interface IBotHandler
     {
-        Task<OperationResult<TelegramBotMenu>> ProcessTelegramActionAsync(string actionId = null);
+        Task<OperationResult<BotMenu>> ProcessActionAsync(string actionId = null);
     }
 }

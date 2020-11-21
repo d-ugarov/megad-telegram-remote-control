@@ -1,6 +1,5 @@
 ﻿using MegaDTelegramRemoteControl.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -9,12 +8,10 @@ namespace MegaDTelegramRemoteControl.Controllers
     public class MegaDController : Controller
     {
         private readonly IHomeLogic homeLogic;
-        private readonly ILogger<MegaDController> logger;
 
-        public MegaDController(IHomeLogic homeLogic, ILogger<MegaDController> logger)
+        public MegaDController(IHomeLogic homeLogic)
         {
             this.homeLogic = homeLogic;
-            this.logger = logger;
         }
 
         [HttpGet]

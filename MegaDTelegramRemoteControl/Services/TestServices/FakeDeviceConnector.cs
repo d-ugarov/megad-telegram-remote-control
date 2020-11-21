@@ -9,11 +9,11 @@ namespace MegaDTelegramRemoteControl.Services.TestServices
 {
     public class FakeDeviceConnector : IDeviceConnector
     {
-        private readonly IDevicePortStatusParser portStatusParser;
+        private readonly IDeviceDataParser deviceDataParser;
 
-        public FakeDeviceConnector(IDevicePortStatusParser portStatusParser)
+        public FakeDeviceConnector(IDeviceDataParser deviceDataParser)
         {
-            this.portStatusParser = portStatusParser;
+            this.deviceDataParser = deviceDataParser;
         }
 
         public Task<OperationResult<DevicePortStatus>> GetPortStatusAsync(DevicePort port)
@@ -28,7 +28,7 @@ namespace MegaDTelegramRemoteControl.Services.TestServices
                 var rand = BitConverter.ToInt64(bytes, 0);
                 var data = rand % 2 == 0 ? SWStatus.On : SWStatus.Off;
 
-                return portStatusParser.ParseStatus(port, data.ToString());
+                return deviceDataParser.ParseStatus(port, data.ToString());
             }));
         }
     }

@@ -7,21 +7,15 @@ namespace MegaDTelegramRemoteControl.Services
 {
     public class InitService : IHostedService
     {
-        private readonly ITelegramService telegramService;
+        private readonly IBotService botService;
         
-        public InitService(ITelegramService telegramService)
+        public InitService(IBotService botService)
         {
-            this.telegramService = telegramService;
+            this.botService = botService;
         }
         
-        public async Task StartAsync(CancellationToken cancellationToken)
-        {
-            await telegramService.InitBotAsync();
-        }
+        public Task StartAsync(CancellationToken cancellationToken) => botService.InitBotAsync();
 
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
+        public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
     }
 }

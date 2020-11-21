@@ -2,7 +2,7 @@
 
 namespace MegaDTelegramRemoteControl.Models
 {
-    public class TelegramBotMenu
+    public class BotMenu
     {
         public string Text { get; set; }
         public List<ButtonItem> Buttons { get; set; }

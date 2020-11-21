@@ -13,12 +13,12 @@ namespace MegaDTelegramRemoteControl.Services
     public class DeviceConnector : IDeviceConnector
     {
         private readonly HttpClient httpClient;
-        private readonly IDevicePortStatusParser portStatusParser;
+        private readonly IDeviceDataParser deviceDataParser;
         
-        public DeviceConnector(HttpClient httpClient, IDevicePortStatusParser portStatusParser)
+        public DeviceConnector(HttpClient httpClient, IDeviceDataParser deviceDataParser)
         {
             this.httpClient = httpClient;
-            this.portStatusParser = portStatusParser;
+            this.deviceDataParser = deviceDataParser;
         }
 
         public Task<OperationResult<DevicePortStatus>> GetPortStatusAsync(DevicePort port)
@@ -28,7 +28,7 @@ namespace MegaDTelegramRemoteControl.Services
                 var query = $"?pt={port.Id}&cmd=get";
                 var data = await SendRequestAsync(port.Device, query);
 
-                return portStatusParser.ParseStatus(port, data);
+                return deviceDataParser.ParseStatus(port, data);
             });
         }
 
@@ -41,7 +41,7 @@ namespace MegaDTelegramRemoteControl.Services
             using var response = await httpClient.SendAsync(httpRequest, cts.Token).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
             
-            return await response.Content.ReadAsStringAsync();
+            return await response.Content.ReadAsStringAsync(cts.Token);
         }
     }
 }

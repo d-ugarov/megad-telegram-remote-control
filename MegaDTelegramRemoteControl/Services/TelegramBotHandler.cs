@@ -2,6 +2,7 @@
 using MegaDTelegramRemoteControl.Infrastructure.Models;
 using MegaDTelegramRemoteControl.Models;
 using MegaDTelegramRemoteControl.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,18 +11,22 @@ using Location = MegaDTelegramRemoteControl.Models.Device.Location;
 
 namespace MegaDTelegramRemoteControl.Services
 {
-    public class TelegramLogic : ITelegramLogic
+    public class TelegramBotHandler : IBotHandler
     {
         private readonly HomeConfig homeConfig;
         private readonly IDeviceConnector deviceConnector;
+        private readonly ILogger<TelegramBotHandler> logger;
 
-        public TelegramLogic(HomeConfig homeConfig, IDeviceConnector deviceConnector)
+        public TelegramBotHandler(HomeConfig homeConfig, 
+            IDeviceConnector deviceConnector, 
+            ILogger<TelegramBotHandler> logger)
         {
             this.homeConfig = homeConfig;
             this.deviceConnector = deviceConnector;
+            this.logger = logger;
         }
 
-        public Task<OperationResult<TelegramBotMenu>> ProcessTelegramActionAsync(string actionId = null)
+        public Task<OperationResult<BotMenu>> ProcessActionAsync(string actionId = null)
         {
             return InvokeOperations.InvokeOperationAsync(async () =>
             {
@@ -32,9 +37,11 @@ namespace MegaDTelegramRemoteControl.Services
             });
         }
 
-        private TelegramBotMenu GetDefaultMenu()
+        private BotMenu GetDefaultMenu()
         {
-            var result = new TelegramBotMenu
+            logger.LogTrace($"[BotHandler] Return default menu");
+            
+            var result = new BotMenu
                          {
                              Text = "Dashboard",
                              Buttons = homeConfig.Locations
@@ -48,7 +55,7 @@ namespace MegaDTelegramRemoteControl.Services
             return result;
         }
 
-        private async Task<TelegramBotMenu> ProcessActionInternalAsync(IEnumerable<Location> locations, string id)
+        private async Task<BotMenu> ProcessActionInternalAsync(IEnumerable<Location> locations, string id)
         {
             foreach (var location in locations)
             {
@@ -63,6 +70,8 @@ namespace MegaDTelegramRemoteControl.Services
                     // action by item id
                     if (item.Id == id)
                     {
+                        logger.LogTrace($"[BotHandler] Call: {location.Name} -> {item.Port.Name}");
+                        
                         // todo: switch port state
                         
                         return await CreateLocationPageAsync(location);
@@ -77,9 +86,11 @@ namespace MegaDTelegramRemoteControl.Services
             return null;
         }
 
-        private async Task<TelegramBotMenu> CreateLocationPageAsync(Location location)
+        private async Task<BotMenu> CreateLocationPageAsync(Location location)
         {
-            var result = new TelegramBotMenu
+            logger.LogTrace($"[BotHandler] Return location: {location.Name}");
+            
+            var result = new BotMenu
                          {
                              Text = location.Name,
                              Buttons = new List<ButtonItem>(),
@@ -114,7 +125,7 @@ namespace MegaDTelegramRemoteControl.Services
             return result;
         }
 
-        private static void AppendNavigationButtons(Location location, TelegramBotMenu menu)
+        private static void AppendNavigationButtons(Location location, BotMenu menu)
         {
             if (location.Parent != null)
             {

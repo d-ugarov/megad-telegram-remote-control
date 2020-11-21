@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace MegaDTelegramRemoteControl.Infrastructure.Middlewares
@@ -24,10 +25,11 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Middlewares
             stopwatch.Start();
 
             var id = Guid.NewGuid();
-            var ip = context.Connection.RemoteIpAddress.ToString();
+            var ip = context.Connection.RemoteIpAddress?.ToString();
 
-            logger.LogDebug($"{id} Started {context.Connection.Id} " +
+            logger.LogDebug($"{id} Started " +
                             $"| Url: {context.Request.GetDisplayUrl()} " +
+                            (context.Request.QueryString.HasValue ? $"| Query: {context.Request.QueryString} " : "") +
                             $"| IP: {ip}");
 
             await next(context);

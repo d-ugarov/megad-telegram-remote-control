@@ -35,30 +35,28 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Jobs.Services
         {
             return Task.FromResult(InvokeOperations.InvokeOperation(() =>
             {
-                using (var scope = Services.CreateScope())
+                using var scope = Services.CreateScope();
+                canWork = true;
+
+                if (configuration?.Jobs != null)
                 {
-                    canWork = true;
-
-                    if (configuration?.Jobs != null)
+                    foreach (var jobType in configuration.Jobs)
                     {
-                        foreach (var jobType in configuration.Jobs)
-                        {
-                            var jobTypeInfo = jobType.GetAttribute<JobTypeAttribute>();
+                        var jobTypeInfo = jobType.GetAttribute<JobTypeAttribute>();
 
-                            logger.LogInformation($"[JobScheduler] Background service '{jobType}' started");
+                        logger.LogInformation($"[JobScheduler] Background service '{jobType}' started");
 
-                            activeJobs[jobType] = new Job
-                                                  {
-                                                      Timer = new Timer(async state => await ProcessJobAsync(state),
-                                                          jobType, jobTypeInfo.DueTime, jobTypeInfo.Period),
-                                                      Interval = jobTypeInfo.Interval
-                                                  };
-                        }
+                        activeJobs[jobType] = new Job
+                                              {
+                                                  Timer = new Timer(async state => await ProcessJobAsync(state),
+                                                      jobType, jobTypeInfo.DueTime, jobTypeInfo.Period),
+                                                  Interval = jobTypeInfo.Interval
+                                              };
                     }
-
-                    if (!configuration?.Jobs?.Any() ?? true)
-                        logger.LogInformation("[JobScheduler] Background services are disabled");
                 }
+
+                if (!configuration?.Jobs?.Any() ?? true)
+                    logger.LogInformation("[JobScheduler] Background services are disabled");
             }));
         }
 
@@ -101,14 +99,13 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Jobs.Services
 
                 job.Timer?.Change(Timeout.Infinite, Timeout.Infinite);
 
-                using (var scope = Services.CreateScope())
+                using var scope = Services.CreateScope();
+                
+                switch (type)
                 {
-                    switch (type)
-                    {
-                        case JobType.Test:
-                            await ProcessOtherJobsAsync(scope);
-                            break;
-                    }
+                    case JobType.Test:
+                        await ProcessOtherJobsAsync(scope);
+                        break;
                 }
             });
 

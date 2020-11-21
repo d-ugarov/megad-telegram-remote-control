@@ -14,38 +14,49 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace MegaDTelegramRemoteControl.Services
 {
-    public class TelegramService : ITelegramService
+    public class TelegramBotService : IBotService
     {
         private readonly TelegramConfig telegramConfig;
         private TelegramBotClient bot;
         
-        private readonly ITelegramLogic telegramLogic;
-        private readonly ILogger<TelegramService> logger;
+        private readonly IBotHandler botHandler;
+        private readonly ILogger<TelegramBotService> logger;
+
+        private bool isInitialized;
         
-        public TelegramService(TelegramConfig telegramConfig, ITelegramLogic telegramLogic, ILogger<TelegramService> logger)
+        public TelegramBotService(TelegramConfig telegramConfig, IBotHandler botHandler, ILogger<TelegramBotService> logger)
         {
             this.telegramConfig = telegramConfig;
-            this.telegramLogic = telegramLogic;
+            this.botHandler = botHandler;
             this.logger = logger;
         }
 
-        public async Task InitBotAsync()
+        public Task InitBotAsync()
         {
-            bot = new TelegramBotClient(telegramConfig.BotAccessToken);
-            bot.OnMessage += OnMessageReceived;
-            bot.OnCallbackQuery += OnCallbackQueryReceived;
-            bot.StartReceiving();
-            
-            await bot.SetMyCommandsAsync(new List<BotCommand>
-                                         {
-                                             new BotCommand
-                                             {
-                                                 Command = "dashboard",
-                                                 Description = "Dashboard"
-                                             }
-                                         });
+            return InvokeOperations.InvokeOperationAsync(async () =>
+            {
+                if (isInitialized)
+                    return;
                 
-            logger.LogTrace("TelegramBot started");
+                logger.LogTrace("TelegramBot starting..");
+                
+                bot = new TelegramBotClient(telegramConfig.BotAccessToken);
+                bot.OnMessage += OnMessageReceived;
+                bot.OnCallbackQuery += OnCallbackQueryReceived;
+                bot.StartReceiving();
+
+                await bot.SetMyCommandsAsync(new List<BotCommand>
+                                             {
+                                                 new BotCommand
+                                                 {
+                                                     Command = "dashboard",
+                                                     Description = "Dashboard"
+                                                 }
+                                             });
+
+                isInitialized = true;
+                logger.LogTrace("TelegramBot started");
+            });
         }
 
         public Task SendDebugTextMessageAsync(string message)
@@ -86,7 +97,7 @@ namespace MegaDTelegramRemoteControl.Services
                 case "dashboard":
                 default:
                 {
-                    var mainMenu = await telegramLogic.ProcessTelegramActionAsync();
+                    var mainMenu = await botHandler.ProcessActionAsync();
                     mainMenu.EnsureSuccess();
 
                     var (text, inlineKeyboard) = GetFormattedAnswer(mainMenu.Data);
@@ -120,7 +131,7 @@ namespace MegaDTelegramRemoteControl.Services
 
         private async Task ProcessCallbackQueryAsync(CallbackQuery callbackQuery)
         {
-            var menu = await telegramLogic.ProcessTelegramActionAsync(callbackQuery.Data);
+            var menu = await botHandler.ProcessActionAsync(callbackQuery.Data);
             menu.EnsureSuccess();
             
             var chatId = new ChatId(callbackQuery.Message.Chat.Id);
@@ -129,7 +140,7 @@ namespace MegaDTelegramRemoteControl.Services
             await EditMessageAsync(text, inlineKeyboard, chatId, callbackQuery.Message);
         }
         
-        private static (string text, InlineKeyboardMarkup inlineKeyboard) GetFormattedAnswer(TelegramBotMenu menu)
+        private static (string text, InlineKeyboardMarkup inlineKeyboard) GetFormattedAnswer(BotMenu menu)
         {
             var buttons = menu.Buttons
                               .GroupBy(x => x.Order, (k, v) => new
