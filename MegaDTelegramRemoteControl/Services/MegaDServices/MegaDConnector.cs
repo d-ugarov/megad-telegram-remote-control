@@ -39,9 +39,9 @@ namespace MegaDTelegramRemoteControl.Services.MegaDServices
             {
                 switch (port.OutMode)
                 {
-                    case DeviceOutPortMode.SW:
+                    case DeviceOutPortMode.SW when action.SWCommand.HasValue:
                     {
-                        var query = $"?cmd={port.Id}:{(int)action.Command}";
+                        var query = $"?cmd={port.Id}:{(int)action.SWCommand}";
                         await SendRequestAsync(port.Device, query);
                         break;
                     }

@@ -4,8 +4,8 @@ namespace MegaDTelegramRemoteControl.Models.Device
 {
     public class DevicePortAction
     {
-        public DeviceOutPortCommand Command { get; set; }
+        public DeviceOutPortCommand? SWCommand { get; set; }
 
-        public static DevicePortAction DefaultSwitch => new() {Command = DeviceOutPortCommand.Switch};
+        public static DevicePortAction DefaultSWSwitch => new() {SWCommand = DeviceOutPortCommand.Switch};
     }
 }

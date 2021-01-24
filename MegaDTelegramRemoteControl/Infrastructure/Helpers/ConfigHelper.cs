@@ -1,5 +1,7 @@
 ﻿using MegaDTelegramRemoteControl.Infrastructure.Configurations;
 using MegaDTelegramRemoteControl.Models;
+using MegaDTelegramRemoteControl.Models.Device;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,9 +14,13 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Helpers
 {
     public static class ConfigHelper
     {
-        public static HomeConfig MakeConfig(DevicesConfig devicesConfig, HomeMapConfig homeMapConfig)
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        
+        public static HomeConfig MakeConfig(DevicesConfig devicesConfig, 
+            HomeMapConfig homeMapConfig,
+            AutomationConfig automationConfig)
         {
-            var devices = GetDevices(devicesConfig);
+            var devices = GetDevices(devicesConfig, automationConfig);
             var locations = GetLocations(homeMapConfig, devices);
 
             return new HomeConfig
@@ -24,10 +30,17 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Helpers
                    };
         }
 
-        private static Dictionary<string, Device> GetDevices(DevicesConfig devicesConfig)
+        private static Dictionary<string, Device> GetDevices(DevicesConfig devicesConfig, AutomationConfig automationConfig)
         {
             var result = new Dictionary<string, Device>();
-
+            
+            bool TryGetPort(string deviceId, string portId, out DevicePort? port)
+            {
+                port = null;
+                return result.TryGetValue(deviceId, out var device) &&
+                       device.Ports.TryGetValue(portId, out port);
+            }
+            
             foreach (var device in devicesConfig.Devices)
             {
                 var deviceModel = new Device
@@ -50,6 +63,39 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Helpers
                 }
 
                 result[device.Id] = deviceModel;
+            }
+
+            foreach (var trigger in automationConfig.Triggers)
+            {
+                if (!TryGetPort(trigger.SourceDeviceId, trigger.SourcePortId, out var port))
+                {
+                    logger.Warn($"Can't find device/port for trigger {trigger}");
+                    continue;
+                }
+
+                var portTrigger = new DevicePortTriggerRule
+                                  {
+                                      Action = trigger.Action,
+                                      Mode = trigger.Mode,
+                                      SourcePortStatus = trigger.SourcePortStatus,
+                                  };
+
+                foreach (var condition in trigger.AdditionalConditions)
+                {
+                    if (!TryGetPort(condition.SourceDeviceId, condition.SourcePortId, out var conditionPort))
+                    {
+                        logger.Warn($"Can't find device/port for trigger {trigger}");
+                        continue;
+                    }
+
+                    portTrigger.AdditionalConditions.Add(new AdditionalDevicePortTriggerRule
+                                                         {
+                                                             DevicePort = conditionPort!,
+                                                             SourcePortStatus = condition.SourcePortStatus,
+                                                         });
+                }
+
+                port!.TriggerRules.Add(portTrigger);
             }
 
             return result;

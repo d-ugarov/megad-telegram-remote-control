@@ -6,7 +6,7 @@ namespace MegaDTelegramRemoteControl.Models.Device
 {
     public class DevicePort
     {
-        private DeviceOutPortMode? outMode;
+        private readonly DeviceOutPortMode? outMode;
         
         public string Id { get; init; } = null!;
         public DevicePortType Type { get; init; }
@@ -23,5 +23,7 @@ namespace MegaDTelegramRemoteControl.Models.Device
         public Dictionary<string, string> OutModeIcons { get; init; } = new();
 
         public Device Device { get; init; } = null!;
+
+        public List<DevicePortTriggerRule> TriggerRules { get; init; } = new();
     }
 }

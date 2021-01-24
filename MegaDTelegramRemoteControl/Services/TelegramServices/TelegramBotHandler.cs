@@ -70,7 +70,7 @@ namespace MegaDTelegramRemoteControl.Services.TelegramServices
                     {
                         logger.LogTrace($"[BotHandler] Call: {location.Name} -> {item.Port.Name}");
 
-                        await deviceConnector.InvokePortActionAsync(item.Port, DevicePortAction.DefaultSwitch);
+                        await deviceConnector.InvokePortActionAsync(item.Port, DevicePortAction.DefaultSWSwitch);
                         
                         return await CreateLocationPageAsync(location);
                     }

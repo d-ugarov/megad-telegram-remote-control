@@ -60,9 +60,10 @@ namespace MegaDTelegramRemoteControl
 
         private void ConfigureConfigs(IServiceCollection services)
         {
+            var automationConfig = Configuration.GetSection(nameof(AutomationConfig)).Get<AutomationConfig>() ?? new();
             var deviceConfig = Configuration.GetSection(nameof(DevicesConfig)).Get<DevicesConfig>() ?? new();
             var homeMapConfig = Configuration.GetSection(nameof(HomeMapConfig)).Get<HomeMapConfig>() ?? new();
-            var homeConfig = ConfigHelper.MakeConfig(deviceConfig, homeMapConfig);
+            var homeConfig = ConfigHelper.MakeConfig(deviceConfig, homeMapConfig, automationConfig);
             
             LogManager.GetCurrentClassLogger().Info(homeConfig.ToString());
             services.AddSingleton(_ => homeConfig);
