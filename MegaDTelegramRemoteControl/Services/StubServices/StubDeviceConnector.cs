@@ -1,5 +1,6 @@
 ﻿using MegaDTelegramRemoteControl.Infrastructure.Models;
 using MegaDTelegramRemoteControl.Models.Device;
+using MegaDTelegramRemoteControl.Models.Device.Enums;
 using MegaDTelegramRemoteControl.Services.Interfaces;
 using System;
 using System.Security.Cryptography;
@@ -9,9 +10,9 @@ namespace MegaDTelegramRemoteControl.Services.StubServices
 {
     public class StubDeviceConnector : IDeviceConnector
     {
-        private readonly IDeviceEventParser deviceDataParser;
+        private readonly IDeviceCommandParser deviceDataParser;
 
-        public StubDeviceConnector(IDeviceEventParser deviceDataParser)
+        public StubDeviceConnector(IDeviceCommandParser deviceDataParser)
         {
             this.deviceDataParser = deviceDataParser;
         }
@@ -30,6 +31,11 @@ namespace MegaDTelegramRemoteControl.Services.StubServices
 
                 return deviceDataParser.ParseStatus(port, data.ToString());
             }));
+        }
+        
+        public Task<OperationResult> InvokePortActionAsync(DevicePort port, DevicePortAction action)
+        {
+            return Task.FromResult(OperationResult.Ok());
         }
     }
 }

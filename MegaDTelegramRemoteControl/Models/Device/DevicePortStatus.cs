@@ -1,11 +1,12 @@
 ﻿using MegaDTelegramRemoteControl.Infrastructure.Configurations;
+using MegaDTelegramRemoteControl.Models.Device.Enums;
 
 namespace MegaDTelegramRemoteControl.Models.Device
 {
     public class DevicePortStatus
     {
-        public DevicePort Port { get; set; } = null!;
-        public SWStatus SWStatus { get; set; }
+        public DevicePort Port { get; init; } = null!;
+        public SWStatus SWStatus { get; init; }
 
         public override string ToString()
         {
@@ -21,11 +22,5 @@ namespace MegaDTelegramRemoteControl.Models.Device
 
             return "";
         }
-    }
-
-    public enum SWStatus
-    {
-        On, 
-        Off,
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MegaDTelegramRemoteControl.Services.Interfaces
 {
-    public interface IDeviceEventParser
+    public interface IDeviceCommandParser
     {
         DeviceEvent ParseEvent(string deviceId, IReadOnlyCollection<(string key, string value)> eventData);
         

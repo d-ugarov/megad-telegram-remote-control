@@ -1,6 +1,7 @@
 ﻿using MegaDTelegramRemoteControl.Infrastructure.Configurations;
 using MegaDTelegramRemoteControl.Infrastructure.Models;
 using MegaDTelegramRemoteControl.Models;
+using MegaDTelegramRemoteControl.Models.Device;
 using MegaDTelegramRemoteControl.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using System;
@@ -68,8 +69,8 @@ namespace MegaDTelegramRemoteControl.Services.TelegramServices
                     if (item.Id == id)
                     {
                         logger.LogTrace($"[BotHandler] Call: {location.Name} -> {item.Port.Name}");
-                        
-                        // todo: switch port state
+
+                        await deviceConnector.InvokePortActionAsync(item.Port, DevicePortAction.DefaultSwitch);
                         
                         return await CreateLocationPageAsync(location);
                     }

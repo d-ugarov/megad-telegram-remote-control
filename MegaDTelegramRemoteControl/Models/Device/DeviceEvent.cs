@@ -12,7 +12,7 @@ namespace MegaDTelegramRemoteControl.Models.Device
         
         public bool IsParsedSuccessfully { get; set; }
 
-        public Device? Device { get; set; }
+        public Device? Device { get; init; }
 
         public DevicePortEvent? Event
         {

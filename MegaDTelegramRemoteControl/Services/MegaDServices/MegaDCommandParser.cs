@@ -9,7 +9,7 @@ using DevicePort = MegaDTelegramRemoteControl.Models.Device.DevicePort;
 
 namespace MegaDTelegramRemoteControl.Services.MegaDServices
 {
-    public class MegaDEventParser : IDeviceEventParser
+    public class MegaDCommandParser : IDeviceCommandParser
     {
         #region Port status parsers
         
@@ -42,12 +42,12 @@ namespace MegaDTelegramRemoteControl.Services.MegaDServices
 
         #region Ctors
         
-        public MegaDEventParser(HomeConfig homeConfig)
+        public MegaDCommandParser(HomeConfig homeConfig)
         {
             this.homeConfig = homeConfig;
         }
         
-        static MegaDEventParser()
+        static MegaDCommandParser()
         {
             parsers = new Dictionary<DeviceOutPortMode, IStatusParser>
                       {

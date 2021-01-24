@@ -2,19 +2,19 @@
 
 namespace MegaDTelegramRemoteControl.Infrastructure.Configurations
 {
-    public class AutomationConfig
+    public record AutomationConfig
     {
-        public List<TriggerRule> Triggers { get; set; } = new();
+        public List<TriggerRule> Triggers { get; init; } = new();
     }
 
-    public class TriggerRule
+    public record TriggerRule
     {
-        public string SourceDeviceId { get; set; } = null!;
-        public string SourcePortId { get; set; } = null!;
-        public string SourcePortStatus { get; set; } = null!;
-        public PortStatusUpdateMode SourcePortStatusUpdateMode { get; set; }
-        public TriggerRuleMode Mode { get; set; }
-        public int IntervalRequestStatus { get; set; }
+        public string SourceDeviceId { get; init; } = null!;
+        public string SourcePortId { get; init; } = null!;
+        public string SourcePortStatus { get; init; } = null!;
+        public PortStatusUpdateMode SourcePortStatusUpdateMode { get; init; }
+        public TriggerRuleMode Mode { get; init; }
+        public int IntervalRequestStatus { get; init; }
     }
 
     public enum TriggerRuleMode

@@ -10,9 +10,9 @@ namespace MegaDTelegramRemoteControl.Models.Device
         private DevicePortInEvent? inPortData;
         private DevicePortOutEvent? outPortData;
 
-        public DevicePort Port { get; set; } = null!;
+        public DevicePort Port { get; init; } = null!;
         
-        public DateTime Date { get; set; }
+        public DateTime Date { get; init; }
 
         public DevicePortInEvent? In
         {

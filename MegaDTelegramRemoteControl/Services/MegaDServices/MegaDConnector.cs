@@ -1,4 +1,5 @@
-﻿using MegaDTelegramRemoteControl.Infrastructure.Models;
+﻿using MegaDTelegramRemoteControl.Infrastructure.Configurations;
+using MegaDTelegramRemoteControl.Infrastructure.Models;
 using MegaDTelegramRemoteControl.Models.Device;
 using MegaDTelegramRemoteControl.Services.Interfaces;
 using System;
@@ -13,12 +14,12 @@ namespace MegaDTelegramRemoteControl.Services.MegaDServices
     public class MegaDConnector : IDeviceConnector
     {
         private readonly HttpClient httpClient;
-        private readonly IDeviceEventParser deviceEventParser;
+        private readonly IDeviceCommandParser deviceCommandParser;
         
-        public MegaDConnector(HttpClient httpClient, IDeviceEventParser deviceEventParser)
+        public MegaDConnector(HttpClient httpClient, IDeviceCommandParser deviceCommandParser)
         {
             this.httpClient = httpClient;
-            this.deviceEventParser = deviceEventParser;
+            this.deviceCommandParser = deviceCommandParser;
         }
 
         public Task<OperationResult<DevicePortStatus>> GetPortStatusAsync(DevicePort port)
@@ -28,10 +29,26 @@ namespace MegaDTelegramRemoteControl.Services.MegaDServices
                 var query = $"?pt={port.Id}&cmd=get";
                 var data = await SendRequestAsync(port.Device, query);
 
-                return deviceEventParser.ParseStatus(port, data);
+                return deviceCommandParser.ParseStatus(port, data);
             });
         }
 
+        public Task<OperationResult> InvokePortActionAsync(DevicePort port, DevicePortAction action)
+        {
+            return InvokeOperations.InvokeOperationAsync(async () =>
+            {
+                switch (port.OutMode)
+                {
+                    case DeviceOutPortMode.SW:
+                    {
+                        var query = $"?cmd={port.Id}:{(int)action.Command}";
+                        await SendRequestAsync(port.Device, query);
+                        break;
+                    }
+                }
+            });
+        }
+        
         private async Task<string> SendRequestAsync(Device device, string query)
         {
             var url = $"{device.Ip}/{device.Pwd}/{query}";
