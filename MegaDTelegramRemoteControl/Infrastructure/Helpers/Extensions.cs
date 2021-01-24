@@ -10,7 +10,7 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Helpers
         public static string GetDescription(this Enum value)
         {
             var field = value.GetType().GetField(value.ToString());
-            return !(Attribute.GetCustomAttribute(field, typeof(DescriptionAttribute)) is DescriptionAttribute attribute)
+            return field is null || !(Attribute.GetCustomAttribute(field, typeof(DescriptionAttribute)) is DescriptionAttribute attribute)
                 ? value.ToString()
                 : attribute.Description;
         }
@@ -20,24 +20,10 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Helpers
             var attributes = value.GetAttributesInternal<T>();
             return (T)attributes[0];
         }
+        
+        public static List<T> GetEnumList<T>() => Enum.GetValues(typeof(T)).Cast<T>().ToList();
 
-        public static List<T> GetAttributes<T>(this object value)
-        {
-            var attributes = value.GetAttributesInternal<T>();
-            return attributes.Select(x => (T)x).ToList();
-        }
-        
-        public static List<T> GetEnumList<T>()
-        {
-            var result = new List<T>();
-            foreach (T x in Enum.GetValues(typeof(T)))
-            {
-                result.Add(x);
-            }
-            return result;
-        }
-        
-        public static bool TryGetAttribute<T>(this object value, out T attribute)
+        public static bool TryGetAttribute<T>(this object value, out T? attribute)
         {
             var attributes = value.GetAttributesInternal<T>();
             
@@ -54,10 +40,12 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Helpers
         private static object[] GetAttributesInternal<T>(this object value)
         {
             var type = value.GetType();
-            var memberInfo = type.GetMember(value.ToString());
-            return memberInfo[0].GetCustomAttributes(typeof(T), false);
+            var memberInfo = type.GetMember(value.ToString() ?? "");
+            return !memberInfo.Any()
+                ? new object[0]
+                : memberInfo[0].GetCustomAttributes(typeof(T), false);
         }
 
-        public static string GetWhitespaces(int count = 1) => new string(' ', Math.Max(0, count * 4));
+        public static string GetWhitespaces(int count = 1) => new(' ', Math.Max(0, count * 4));
     }
 }

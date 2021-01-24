@@ -11,31 +11,31 @@ namespace MegaDTelegramRemoteControl.Services
     {
         private readonly HomeConfig homeConfig;
         private readonly IHomeState homeState;
-        private readonly IDeviceDataParser deviceDataParser;
+        private readonly IDeviceEventParser deviceEventParser;
         private readonly IDeviceConnector deviceConnector;
         private readonly IBotService botService;
         private readonly ILogger<HomeLogic> logger;
         
         public HomeLogic(HomeConfig homeConfig,
             IHomeState homeState,
-            IDeviceDataParser deviceDataParser,
+            IDeviceEventParser deviceEventParser,
             IDeviceConnector deviceConnector,
             IBotService botService,
             ILogger<HomeLogic> logger)
         {
             this.homeConfig = homeConfig;
             this.homeState = homeState;
-            this.deviceDataParser = deviceDataParser;
+            this.deviceEventParser = deviceEventParser;
             this.deviceConnector = deviceConnector;
             this.botService = botService;
             this.logger = logger;
         }
 
-        public Task<OperationResult<OnNewEventResult>> OnNewEventAsync(string deviceId, List<(string key, string value)> query)
+        public Task<OperationResult<OnNewEventResult>> OnNewEventAsync(string deviceId, IReadOnlyCollection<(string key, string value)> eventData)
         {
             return InvokeOperations.InvokeOperationAsync(async () =>
             {
-                var deviceEvent = deviceDataParser.ParseEvent(deviceId, query);
+                var deviceEvent = deviceEventParser.ParseEvent(deviceId, eventData);
                 logger.LogTrace(deviceEvent.ToString());
                 
                 // todo: add to message queue

@@ -4,7 +4,7 @@ namespace MegaDTelegramRemoteControl.Models.Device
 {
     public class DevicePortStatus
     {
-        public DevicePort Port { get; set; }
+        public DevicePort Port { get; set; } = null!;
         public SWStatus SWStatus { get; set; }
 
         public override string ToString()
@@ -13,11 +13,9 @@ namespace MegaDTelegramRemoteControl.Models.Device
             {
                 case DeviceOutPortMode.SW:
                 {
-                    if (Port.OutModeIcons != null &&
-                        Port.OutModeIcons.TryGetValue(SWStatus.ToString(), out var icon))
-                        return icon;
-
-                    return $"[{SWStatus}]";
+                    return Port.OutModeIcons.TryGetValue(SWStatus.ToString(), out var icon)
+                        ? icon
+                        : $"[{SWStatus}]";
                 }
             }
 

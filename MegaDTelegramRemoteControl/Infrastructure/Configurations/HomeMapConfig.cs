@@ -2,24 +2,24 @@
 
 namespace MegaDTelegramRemoteControl.Infrastructure.Configurations
 {
-    public class HomeMapConfig
+    public record HomeMapConfig
     {
-        public List<Location> Locations { get; set; }
+        public List<Location> Locations { get; init; } = new();
     }
 
-    public class Location
+    public record Location
     {
-        public string Name { get; set; }
-        
-        public List<LocationItems> Items { get; set; }
-        
-        public List<Location> SubLocations { get; set; }
+        public string Name { get; init; } = null!;
+
+        public List<LocationItems> Items { get; init; } = new();
+
+        public List<Location> SubLocations { get; init; } = new();
     }
 
-    public class LocationItems
+    public record LocationItems
     {
-        public string DeviceId { get; set; }
-        public string PortId { get; set; }
-        public string CustomName { get; set; }
+        public string DeviceId { get; init; } = null!;
+        public string PortId { get; init; } = null!;
+        public string? CustomName { get; init; }
     }
 }

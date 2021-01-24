@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace MegaDTelegramRemoteControl.Models.Device
+namespace MegaDTelegramRemoteControl.Models.Device.Enums
 {
     public enum DeviceInPortCommand
     {

@@ -1,4 +1,5 @@
 using MegaDTelegramRemoteControl.Infrastructure.Configurations;
+using MegaDTelegramRemoteControl.Infrastructure.Filters;
 using MegaDTelegramRemoteControl.Infrastructure.Helpers;
 using MegaDTelegramRemoteControl.Infrastructure.Jobs.Configurations;
 using MegaDTelegramRemoteControl.Infrastructure.Jobs.Services;
@@ -6,7 +7,9 @@ using MegaDTelegramRemoteControl.Infrastructure.Middlewares;
 using MegaDTelegramRemoteControl.Infrastructure.Models;
 using MegaDTelegramRemoteControl.Services;
 using MegaDTelegramRemoteControl.Services.Interfaces;
-using MegaDTelegramRemoteControl.Services.TestServices;
+using MegaDTelegramRemoteControl.Services.MegaDServices;
+using MegaDTelegramRemoteControl.Services.StubServices;
+using MegaDTelegramRemoteControl.Services.TelegramServices;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -36,10 +39,13 @@ namespace MegaDTelegramRemoteControl
                 if (!string.IsNullOrEmpty(kestrelConfig?.Url))
                     x.Listen(IPAddress.Parse(kestrelConfig.Url), kestrelConfig.Port);
             });
-            
+
             services.AddMemoryCache()
                     .AddResponseCaching()
-                    .AddMvcCore()
+                    .AddMvcCore(x =>
+                    {
+                        x.Filters.Add(typeof(HttpResponseExceptionFilter));
+                    })
                     .AddApiExplorer()
                     .AddDataAnnotations()
                     .AddJsonOptions(x =>
@@ -54,31 +60,31 @@ namespace MegaDTelegramRemoteControl
 
         private void ConfigureConfigs(IServiceCollection services)
         {
-            var deviceConfig = Configuration.GetSection(nameof(DevicesConfig)).Get<DevicesConfig>();
-            var homeMapConfig = Configuration.GetSection(nameof(HomeMapConfig)).Get<HomeMapConfig>();
+            var deviceConfig = Configuration.GetSection(nameof(DevicesConfig)).Get<DevicesConfig>() ?? new();
+            var homeMapConfig = Configuration.GetSection(nameof(HomeMapConfig)).Get<HomeMapConfig>() ?? new();
             var homeConfig = ConfigHelper.MakeConfig(deviceConfig, homeMapConfig);
             
             LogManager.GetCurrentClassLogger().Info(homeConfig.ToString());
             services.AddSingleton(_ => homeConfig);
-            
-            services.AddSingleton(_ => Configuration.GetSection(nameof(TelegramConfig)).Get<TelegramConfig>());
-            services.AddSingleton(_ => Configuration.GetSection(nameof(InternalSchedulerConfig)).Get<InternalSchedulerConfig>());
+
+            services.AddSingleton(_ => Configuration.GetSection(nameof(TelegramConfig)).Get<TelegramConfig>() ?? new());
+            services.AddSingleton(_ => Configuration.GetSection(nameof(InternalSchedulerConfig)).Get<InternalSchedulerConfig>() ?? new());
         }
 
         private void ConfigureCustomServices(IServiceCollection services)
         {
-            var platformConfig = Configuration.GetSection(nameof(PlatformConfig)).Get<PlatformConfig>();
+            var platformConfig = Configuration.GetSection(nameof(PlatformConfig)).Get<PlatformConfig>() ?? new();
             
             services.AddSingleton<IBotService, TelegramBotService>();
             services.AddTransient<IBotHandler, TelegramBotHandler>();
             services.AddTransient<IHomeLogic, HomeLogic>();
             services.AddSingleton<IHomeState, HomeState>();
-            services.AddTransient<IDeviceDataParser, DeviceDataParser>();
+            services.AddTransient<IDeviceEventParser, MegaDEventParser>();
 
             if (!platformConfig.UseFakeDeviceConnector)
-                services.AddHttpClient<IDeviceConnector, DeviceConnector>();
+                services.AddHttpClient<IDeviceConnector, MegaDConnector>();
             else
-                services.AddTransient<IDeviceConnector, FakeDeviceConnector>();
+                services.AddTransient<IDeviceConnector, StubDeviceConnector>();
             
             services.AddHostedService<InitService>();
             services.AddHostedService<JobScheduler>();

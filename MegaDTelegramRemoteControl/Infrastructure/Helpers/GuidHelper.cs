@@ -45,7 +45,7 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Helpers
         public static Guid Create(Guid namespaceId, string name, int version)
         {
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
 
             // convert the name to a sequence of octets (as defined by the standard or conventions of its namespace) (step 3)
             // ASSUME: UTF-8 encoding is always appropriate
@@ -66,9 +66,9 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Helpers
         public static Guid Create(Guid namespaceId, byte[] name, int version)
         {
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             if (version != 3 && version != 5)
-                throw new ArgumentOutOfRangeException("version", "version must be either 3 or 5.");
+                throw new ArgumentOutOfRangeException(nameof(version), "version must be either 3 or 5.");
 
             // convert the namespace UUID to network order (step 3)
             var namespaceBytes = namespaceId.ToByteArray();
@@ -80,7 +80,7 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Helpers
             {
                 algorithm.TransformBlock(namespaceBytes, 0, namespaceBytes.Length, null, 0);
                 algorithm.TransformFinalBlock(name, 0, name.Length);
-                hash = algorithm.Hash;
+                hash = algorithm.Hash!;
             }
 
             // most bytes from the hash are copied straight to the bytes of the new GUID (steps 5-7, 9, 11-12)
@@ -114,7 +114,7 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Helpers
         public static readonly Guid IsoOidNamespace = new Guid("6ba7b812-9dad-11d1-80b4-00c04fd430c8");
 
         // Converts a GUID (expressed as a byte array) to/from network order (MSB-first).
-        internal static void SwapByteOrder(byte[] guid)
+        private static void SwapByteOrder(byte[] guid)
         {
             SwapBytes(guid, 0, 3);
             SwapBytes(guid, 1, 2);

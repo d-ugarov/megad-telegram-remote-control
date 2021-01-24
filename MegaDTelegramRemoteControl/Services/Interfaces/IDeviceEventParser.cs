@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace MegaDTelegramRemoteControl.Services.Interfaces
 {
-    public interface IDeviceDataParser
+    public interface IDeviceEventParser
     {
-        DeviceEvent ParseEvent(string deviceId, List<(string key, string value)> query);
+        DeviceEvent ParseEvent(string deviceId, IReadOnlyCollection<(string key, string value)> eventData);
         
         DevicePortStatus ParseStatus(DevicePort port, string portStatus);
     }

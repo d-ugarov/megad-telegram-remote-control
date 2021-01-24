@@ -7,26 +7,26 @@ namespace MegaDTelegramRemoteControl.Models.Device
 {
     public class DevicePortEvent
     {
-        private DevicePortInEvent inPortData;
-        private DevicePortOutEvent outPortData;
-        
-        public DevicePort Port { get; set; }
+        private DevicePortInEvent? inPortData;
+        private DevicePortOutEvent? outPortData;
+
+        public DevicePort Port { get; set; } = null!;
         
         public DateTime Date { get; set; }
 
-        public DevicePortInEvent In
+        public DevicePortInEvent? In
         {
             get => Port.Type == DevicePortType.IN
                 ? inPortData
-                : throw new OperationException($"'IN' port data is not available for port type {Port.Type}");
+                : throw new OperationException($"'IN' port data is not available for port type {Port?.Type}");
             set => inPortData = value;
         }
 
-        public DevicePortOutEvent Out
+        public DevicePortOutEvent? Out
         {
             get => Port.Type == DevicePortType.OUT
                 ? outPortData
-                : throw new OperationException($"'Out' port data is not available for port type {Port.Type}");
+                : throw new OperationException($"'Out' port data is not available for port type {Port?.Type}");
             set => outPortData = value;
         }
 

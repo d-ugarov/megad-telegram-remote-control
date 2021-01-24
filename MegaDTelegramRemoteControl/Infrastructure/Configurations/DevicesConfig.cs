@@ -2,32 +2,33 @@
 
 namespace MegaDTelegramRemoteControl.Infrastructure.Configurations
 {
-    public class DevicesConfig
+    public record DevicesConfig
     {
-        public List<Device> Devices { get; set; }
+        public List<Device> Devices { get; init; } = new();
     }
     
     /// <summary> MegaD </summary>
-    public class Device
+    public record Device
     {
         /// <summary>
         /// Device id
         /// <para>Used to distinguish events from multiple MegaDs</para>
         /// </summary>
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public string Ip { get; set; }
-        
-        public List<DevicePort> DevicePorts { get; set; }
+        public string Id { get; init; } = null!;
+
+        public string Name { get; init; } = null!;
+        public string Ip { get; init; } = null!;
+
+        public List<DevicePort> DevicePorts { get; init; } = new();
     }
 
-    public class DevicePort
+    public record DevicePort
     {
-        public string Id { get; set; }
-        public DevicePortType Type { get; set; }
-        public string Name { get; set; }
-        public DeviceOutPortMode? OutMode { get; set; }
-        public Dictionary<string, string> OutModeIcons { get; set; }
+        public string Id { get; init; } = null!;
+        public DevicePortType Type { get; init; }
+        public string Name { get; init; } = null!;
+        public DeviceOutPortMode? OutMode { get; init; }
+        public Dictionary<string, string> OutModeIcons { get; init; } = new();
     }
 
     public enum DevicePortType

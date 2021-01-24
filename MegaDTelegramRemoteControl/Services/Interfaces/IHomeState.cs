@@ -6,7 +6,7 @@ namespace MegaDTelegramRemoteControl.Services.Interfaces
     {
         void Set(DeviceEvent deviceEvent);
 
-        DevicePortEvent Get(DevicePort port);
+        DevicePortEvent? Get(DevicePort port);
         
         void Clean();
     }

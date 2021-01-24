@@ -1,5 +1,6 @@
 ﻿using MegaDTelegramRemoteControl.Infrastructure.Helpers;
 using MegaDTelegramRemoteControl.Models.Device;
+using MegaDTelegramRemoteControl.Models.Device.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;

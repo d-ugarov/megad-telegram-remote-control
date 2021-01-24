@@ -18,7 +18,7 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Models
             catch (OperationException ex)
             {
                 Log(ex);
-                return OperationResult.Failed(ex.Message, ex);
+                return OperationResult.Failed(ex.Message, ex, ex.ErrorCode, ex.ErrorData);
             }
             catch (Exception ex)
             {
@@ -37,7 +37,7 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Models
             catch (OperationException ex)
             {
                 Log(ex);
-                return OperationResult<T>.Failed(ex.Message, ex);
+                return OperationResult<T>.Failed(ex.Message, ex, ex.ErrorCode, ex.ErrorData);
             }
             catch (Exception ex)
             {
@@ -56,7 +56,7 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Models
             catch (OperationException ex)
             {
                 Log(ex);
-                return OperationResult.Failed(ex.Message, ex);
+                return OperationResult.Failed(ex.Message, ex, ex.ErrorCode, ex.ErrorData);
             }
             catch (Exception ex)
             {
@@ -75,7 +75,7 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Models
             catch (OperationException ex)
             {
                 Log(ex);
-                return OperationResult<T>.Failed(ex.Message, ex);
+                return OperationResult<T>.Failed(ex.Message, ex, ex.ErrorCode, ex.ErrorData);
             }
             catch (Exception ex)
             {

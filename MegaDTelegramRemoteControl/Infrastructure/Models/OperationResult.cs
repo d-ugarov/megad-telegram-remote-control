@@ -7,17 +7,24 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Models
     public interface IOperationResult
     {
         bool IsSuccess { get; }
-        List<string> Errors { get; }
-        Exception Exception { get; }
+        ErrorCodes ErrorCode { get; }
+        object? ErrorData { get; }
+        bool HasErrorMessages { get; }
+        List<string>? Errors { get; }
+        Exception? Exception { get; }
 
         void EnsureSuccess();
     }
 
     public class OperationResult : IOperationResult
     {
-        public bool IsSuccess { get; private set; }
-        public List<string> Errors { get; private set; }
-        public Exception Exception { get; private set; }
+        public bool IsSuccess { get; private init; }
+        
+        public ErrorCodes ErrorCode { get; private init; }
+        public object? ErrorData { get; private init;}
+        public bool HasErrorMessages => Errors?.Any() ?? false;
+        public List<string>? Errors { get; private init; }
+        public Exception? Exception { get; private init; }
 
         public void EnsureSuccess()
         {
@@ -27,77 +34,83 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Models
             if (Exception != null)
                 throw Exception;
 
-            if (Errors != null && Errors.Any())
+            if (HasErrorMessages)
                 throw new Exception(this.Report());
             
             throw new Exception($"Unknown error");
         }
-        
-        public static OperationResult Ok()
-        {
-            return new OperationResult
-                   {
-                       IsSuccess = true,
-                       Errors = new List<string>()
-                   };
-        }
 
-        public static OperationResult Failed(Exception exception = null)
+        public static OperationResult Ok() => new()
+                                              {
+                                                  IsSuccess = true,
+                                              };
+
+        public static OperationResult Failed(Exception? exception = null, 
+            ErrorCodes errorCode = default, object? errorData = null)
         {
-            return new OperationResult
+            return new()
                    {
                        IsSuccess = false,
                        Errors = new List<string>(),
-                       Exception = exception
+                       Exception = exception,
+                       ErrorCode = errorCode,
+                       ErrorData = errorData,
                    };
         }
 
-        public static OperationResult Failed(string error, Exception exception = null)
+        public static OperationResult Failed(string error, Exception? exception = null, 
+            ErrorCodes errorCode = default, object? errorData = null)
         {
-            return new OperationResult
+            return new()
                    {
                        IsSuccess = false,
                        Errors = new List<string> {error},
-                       Exception = exception
+                       Exception = exception,
+                       ErrorCode = errorCode,
+                       ErrorData = errorData,
                    };
         }
 
-        public static OperationResult Failed(IEnumerable<string> errors, Exception exception = null)
+        public static OperationResult Failed(IEnumerable<string>? errors, Exception? exception = null, 
+            ErrorCodes errorCode = default, object? errorData = null)
         {
-            return new OperationResult
+            return new()
                    {
                        IsSuccess = false,
-                       Errors = errors.ToList(),
-                       Exception = exception
+                       Errors = errors?.ToList(),
+                       Exception = exception,
+                       ErrorCode = errorCode,
+                       ErrorData = errorData,
                    };
         }
     }
 
     public class OperationResult<T> : IOperationResult
     {
-        public bool IsSuccess { get; private set; }
-        public List<string> Errors { get; private set; }
-        public Exception Exception { get; private set; }
-        public T Data { get; set; }
+        public bool IsSuccess { get; private init; }
+        
+        public ErrorCodes ErrorCode { get; private init; }
+        public object? ErrorData { get; private init; }
+        public bool HasErrorMessages => Errors?.Any() ?? false;
+        public List<string>? Errors { get; private init; }
+        public Exception? Exception { get; private init; }
+
+        private readonly T? data;
+        
+        public T? Data
+        {
+            get => data ?? default;
+            private init => data = value;
+        }
 
         public T DataUnsafe
         {
             get
             {
-                if (IsSuccess)
-                    return Data;
-                
-                if (Exception != null)
-                    throw Exception;
-
-                if (Errors.Any())
-                    throw new Exception(this.Report());
-                
-                throw new Exception($"Unknown error");
+                EnsureSuccess();
+                return Data!;
             }
         }
-
-        public OperationResult ActionResult => IsSuccess ? OperationResult.Ok() : OperationResult.Failed(Errors, Exception);
 
         public void EnsureSuccess()
         {
@@ -107,58 +120,63 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Models
             if (Exception != null)
                 throw Exception;
 
-            if (Errors.Any())
+            if (HasErrorMessages)
                 throw new Exception(this.Report());
             
             throw new Exception($"Unknown error");
         }
-        
-        public static OperationResult<T> Ok()
-        {
-            return new OperationResult<T>
-                   {
-                       IsSuccess = true,
-                       Errors = new List<string>()
-                   };
-        }
 
-        public static OperationResult<T> Ok(T result)
-        {
-            return new OperationResult<T>
-            {
-                       IsSuccess = true,
-                       Errors = new List<string>(),
-                       Data = result
-                   };
-        }
+        public OperationResult ActionResult => IsSuccess
+            ? OperationResult.Ok()
+            : OperationResult.Failed(Errors, Exception, ErrorCode, ErrorData);
 
-        public static OperationResult<T> Failed(Exception exception = null)
+        public static OperationResult<T> Ok() => new()
+                                                 {
+                                                     IsSuccess = true,
+                                                 };
+
+        public static OperationResult<T> Ok(T result) => new()
+                                                         {
+                                                             IsSuccess = true,
+                                                             Data = result,
+                                                         };
+
+        public static OperationResult<T> Failed(Exception? exception = null, 
+            ErrorCodes errorCode = default, object? errorData = null)
         {
-            return new OperationResult<T>
+            return new()
                    {
                        IsSuccess = false,
                        Errors = new List<string>(),
-                       Exception = exception
+                       Exception = exception,
+                       ErrorCode = errorCode,
+                       ErrorData = errorData,
                    };
         }
 
-        public static OperationResult<T> Failed(string error, Exception exception = null)
+        public static OperationResult<T> Failed(string error, Exception? exception = null, 
+            ErrorCodes errorCode = default, object? errorData = null)
         {
-            return new OperationResult<T>
+            return new()
                    {
                        IsSuccess = false,
                        Errors = new List<string> {error},
-                       Exception = exception
+                       Exception = exception,
+                       ErrorCode = errorCode,
+                       ErrorData = errorData,
                    };
         }
 
-        public static OperationResult<T> Failed(IEnumerable<string> errors, Exception exception = null)
+        public static OperationResult<T> Failed(IEnumerable<string> errors, Exception? exception = null, 
+            ErrorCodes errorCode = default, object? errorData = null)
         {
-            return new OperationResult<T>
+            return new()
                    {
                        IsSuccess = false,
                        Errors = errors.ToList(),
-                       Exception = exception
+                       Exception = exception,
+                       ErrorCode = errorCode,
+                       ErrorData = errorData,
                    };
         }
     }
@@ -176,7 +194,7 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Models
             {
                 case ReportLevel.WithExceptionMessage:
                 {
-                    return operationResult.Errors.Any()
+                    return operationResult.Errors?.Any() ?? false
                         ? $"{failed} ({string.Join(", ", operationResult.Errors)})"
                         : !string.IsNullOrEmpty(operationResult.Exception?.Message)
                             ? $"{failed} ({operationResult.Exception.Message})"
@@ -184,7 +202,9 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Models
                 }
                 case ReportLevel.WithExceptionFull:
                 {
-                    var msg = operationResult.Errors.Any() ? $"{failed} ({string.Join(", ", operationResult.Errors)})" : failed;
+                    var msg = operationResult.Errors?.Any() ?? false
+                        ? $"{failed} ({string.Join(", ", operationResult.Errors)})"
+                        : failed;
                     
                     if (operationResult.Exception != null)
                         msg += $"\nException: {operationResult.Exception}";
@@ -193,7 +213,9 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Models
                 }
                 default:
                 {
-                    return operationResult.Errors.Any() ? $"{failed} ({string.Join(", ", operationResult.Errors)})" : failed;
+                    return operationResult.Errors?.Any() ?? false
+                        ? $"{failed} ({string.Join(", ", operationResult.Errors)})"
+                        : failed;
                 }
             }
         }

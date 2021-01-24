@@ -9,7 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Location = MegaDTelegramRemoteControl.Models.Device.Location;
 
-namespace MegaDTelegramRemoteControl.Services
+namespace MegaDTelegramRemoteControl.Services.TelegramServices
 {
     public class TelegramBotHandler : IBotHandler
     {
@@ -26,15 +26,12 @@ namespace MegaDTelegramRemoteControl.Services
             this.logger = logger;
         }
 
-        public Task<OperationResult<BotMenu>> ProcessActionAsync(string actionId = null)
+        public async Task<BotMenu> ProcessActionAsync(string? actionId = null)
         {
-            return InvokeOperations.InvokeOperationAsync(async () =>
-            {
-                if (string.IsNullOrEmpty(actionId))
-                    return GetDefaultMenu();
-                
-                return await ProcessActionInternalAsync(homeConfig.Locations, actionId) ?? GetDefaultMenu();
-            });
+            if (string.IsNullOrEmpty(actionId))
+                return GetDefaultMenu();
+
+            return await ProcessActionInternalAsync(homeConfig.Locations, actionId) ?? GetDefaultMenu();
         }
 
         private BotMenu GetDefaultMenu()
@@ -55,7 +52,7 @@ namespace MegaDTelegramRemoteControl.Services
             return result;
         }
 
-        private async Task<BotMenu> ProcessActionInternalAsync(IEnumerable<Location> locations, string id)
+        private async Task<BotMenu?> ProcessActionInternalAsync(IEnumerable<Location> locations, string id)
         {
             foreach (var location in locations)
             {
@@ -89,11 +86,10 @@ namespace MegaDTelegramRemoteControl.Services
         private async Task<BotMenu> CreateLocationPageAsync(Location location)
         {
             logger.LogTrace($"[BotHandler] Return location: {location.Name}");
-            
+
             var result = new BotMenu
                          {
                              Text = location.Name,
-                             Buttons = new List<ButtonItem>(),
                          };
 
             foreach (var subLocation in location.SubLocations)

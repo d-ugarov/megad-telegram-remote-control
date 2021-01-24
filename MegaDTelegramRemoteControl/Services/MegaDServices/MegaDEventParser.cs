@@ -1,14 +1,15 @@
 ﻿using MegaDTelegramRemoteControl.Infrastructure.Configurations;
 using MegaDTelegramRemoteControl.Models;
 using MegaDTelegramRemoteControl.Models.Device;
+using MegaDTelegramRemoteControl.Models.Device.Enums;
 using MegaDTelegramRemoteControl.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using DevicePort = MegaDTelegramRemoteControl.Models.Device.DevicePort;
 
-namespace MegaDTelegramRemoteControl.Services
+namespace MegaDTelegramRemoteControl.Services.MegaDServices
 {
-    public class DeviceDataParser : IDeviceDataParser
+    public class MegaDEventParser : IDeviceEventParser
     {
         #region Port status parsers
         
@@ -21,7 +22,7 @@ namespace MegaDTelegramRemoteControl.Services
         {
             public DevicePortStatus Parse(DevicePort devicePort, string portStatus)
             {
-                return new DevicePortStatus
+                return new()
                        {
                            SWStatus = Enum.Parse<SWStatus>(portStatus, true),
                            Port = devicePort,
@@ -41,12 +42,12 @@ namespace MegaDTelegramRemoteControl.Services
 
         #region Ctors
         
-        public DeviceDataParser(HomeConfig homeConfig)
+        public MegaDEventParser(HomeConfig homeConfig)
         {
             this.homeConfig = homeConfig;
         }
         
-        static DeviceDataParser()
+        static MegaDEventParser()
         {
             parsers = new Dictionary<DeviceOutPortMode, IStatusParser>
                       {
@@ -58,7 +59,7 @@ namespace MegaDTelegramRemoteControl.Services
 
         #region Events
         
-        public DeviceEvent ParseEvent(string deviceId, List<(string key, string value)> query)
+        public DeviceEvent ParseEvent(string deviceId, IReadOnlyCollection<(string key, string value)> eventData)
         {
             if (!homeConfig.Devices.TryGetValue(deviceId, out var device))
                 return DeviceEvent.UnknownEvent;
@@ -68,26 +69,30 @@ namespace MegaDTelegramRemoteControl.Services
                              Device = device,
                          };
 
-            if (!TryParseEventType(query, result, out var portId))
+            if (!TryGetEventType(eventData, out var portId, out var eventType) || portId is null || eventType is null)
                 return result;
+
+            result.Type = eventType.Value;
 
             switch (result.Type)
             {
                 case DeviceEventType.PortEvent:
                 {
-                    if (!TryGetDevicePort(portId, result))
+                    if (!TryGetDevicePort(portId, result.Device.Ports, out var portEvent) || portEvent is null)
                         return result;
 
-                    switch (result.Event.Port.Type)
+                    result.Event = portEvent;
+
+                    switch (result.Event!.Port.Type)
                     {
                         case DevicePortType.IN:
                         {
-                            ParseInPort(query, result);
+                            result.Event.In = GetInPortEvent(eventData);
                             break;
                         }
                         case DevicePortType.OUT:
                         {
-                            ParseOutPort(query, result);
+                            result.Event.Out = GetOutPortEvent(eventData);
                             break;
                         }
                     }
@@ -100,42 +105,46 @@ namespace MegaDTelegramRemoteControl.Services
             return result;
         }
         
-        private static bool TryParseEventType(IEnumerable<(string key, string value)> query, DeviceEvent result, out string portId)
+        private static bool TryGetEventType(IEnumerable<(string key, string value)> eventData, out string? portId, out DeviceEventType? eventType)
         {
-            foreach (var (key, value) in query)
+            foreach (var (key, value) in eventData)
             {
-                foreach (var (command, eventType) in Constants.DeviceEventTypes)
+                foreach (var (command, type) in Constants.DeviceEventTypes)
                 {
                     if (!key.Equals(command)) 
                         continue;
-                    
-                    result.Type =  eventType;
+
+                    eventType = type;
                     portId = value;
                     return true;
                 }
             }
 
+            eventType = null;
             portId = null;
             return false;
         }
         
-        private static bool TryGetDevicePort(string portId, DeviceEvent result)
+        private static bool TryGetDevicePort(string portId, IReadOnlyDictionary<string, DevicePort> devicePorts, out DevicePortEvent? portEvent)
         {
-            if (!result.Device.Ports.TryGetValue(portId, out var port)) 
+            if (!devicePorts.TryGetValue(portId, out var port))
+            {
+                portEvent = null;
                 return false;
+            }
 
-            result.Event = new DevicePortEvent {Port = port, Date = DateTime.UtcNow};
+            portEvent = new DevicePortEvent {Port = port, Date = DateTime.UtcNow};
             return true;
         }
 
-        private static void ParseInPort(IEnumerable<(string key, string value)> query, DeviceEvent result)
+        private static DevicePortInEvent GetInPortEvent(IEnumerable<(string key, string value)> eventData)
         {
-            result.Event.In = new DevicePortInEvent
-                             {
-                                 Command = DeviceInPortCommand.KeyPressed,
-                             };
+            var inPortEvent = new DevicePortInEvent
+                              {
+                                  Command = DeviceInPortCommand.KeyPressed,
+                              };
             
-            foreach (var (key, value) in query)
+            foreach (var (key, value) in eventData)
             {
                 switch (key)
                 {
@@ -143,11 +152,11 @@ namespace MegaDTelegramRemoteControl.Services
                     {
                         if (int.TryParse(value, out var type))
                         {
-                            result.Event.In.Command = type switch
+                            inPortEvent.Command = type switch
                             {
                                 1 => DeviceInPortCommand.KeyReleased,
                                 2 => DeviceInPortCommand.LongClick,
-                                _ => result.Event.In.Command
+                                _ => inPortEvent.Command,
                             };
                         }
                         break;
@@ -156,11 +165,11 @@ namespace MegaDTelegramRemoteControl.Services
                     {
                         if (int.TryParse(value, out var type))
                         {
-                            result.Event.In.Command = type switch
+                            inPortEvent.Command = type switch
                             {
                                 1 => DeviceInPortCommand.Click,
                                 2 => DeviceInPortCommand.DoubleClick,
-                                _ => result.Event.In.Command
+                                _ => inPortEvent.Command,
                             };
                         }
                         break;
@@ -168,21 +177,23 @@ namespace MegaDTelegramRemoteControl.Services
                     case "cnt":
                     {
                         if (int.TryParse(value, out var counter))
-                            result.Event.In.Counter = counter;
+                            inPortEvent.Counter = counter;
                         break;
                     }
                 }
             }
+
+            return inPortEvent;
         }
 
-        private static void ParseOutPort(IEnumerable<(string key, string value)> query, DeviceEvent result)
+        private static DevicePortOutEvent GetOutPortEvent(IEnumerable<(string key, string value)> eventData)
         {
-            result.Event.Out = new DevicePortOutEvent
-                              {
-                                  Command = DeviceOutPortCommand.Unknown,
-                              };
+            var outPortEvent = new DevicePortOutEvent
+                               {
+                                   Command = DeviceOutPortCommand.Unknown,
+                               };
             
-            foreach (var (key, value) in query)
+            foreach (var (key, value) in eventData)
             {
                 switch (key)
                 {
@@ -191,12 +202,14 @@ namespace MegaDTelegramRemoteControl.Services
                         if (int.TryParse(value, out var cmd) &&
                             Enum.IsDefined(typeof(DeviceOutPortCommand), cmd))
                         {
-                            result.Event.Out.Command = (DeviceOutPortCommand)cmd;
+                            outPortEvent.Command = (DeviceOutPortCommand)cmd;
                         }
                         break;
                     }
                 }
             }
+
+            return outPortEvent;
         }
         
         #endregion

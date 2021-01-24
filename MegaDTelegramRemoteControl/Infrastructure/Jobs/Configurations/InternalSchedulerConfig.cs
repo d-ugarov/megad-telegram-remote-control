@@ -7,7 +7,7 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Jobs.Configurations
 {
     public class InternalSchedulerConfig
     {
-        public List<JobType> Jobs { get; set; }
+        public List<JobType> Jobs { get; set; } = new();
     }
 
     public class JobTypeAttribute : Attribute
@@ -26,7 +26,7 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Jobs.Configurations
 
     internal class Job
     {
-        public Timer Timer { get; set; }
+        public Timer? Timer { get; set; }
         public TimeSpan Interval { get; set; }
     }
 }

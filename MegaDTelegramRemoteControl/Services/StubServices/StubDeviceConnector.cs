@@ -5,13 +5,13 @@ using System;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
-namespace MegaDTelegramRemoteControl.Services.TestServices
+namespace MegaDTelegramRemoteControl.Services.StubServices
 {
-    public class FakeDeviceConnector : IDeviceConnector
+    public class StubDeviceConnector : IDeviceConnector
     {
-        private readonly IDeviceDataParser deviceDataParser;
+        private readonly IDeviceEventParser deviceDataParser;
 
-        public FakeDeviceConnector(IDeviceDataParser deviceDataParser)
+        public StubDeviceConnector(IDeviceEventParser deviceDataParser)
         {
             this.deviceDataParser = deviceDataParser;
         }

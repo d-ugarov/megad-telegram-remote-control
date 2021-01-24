@@ -2,12 +2,12 @@
 
 namespace MegaDTelegramRemoteControl.Infrastructure.Configurations
 {
-    public class TelegramConfig
+    public record TelegramConfig
     {
-        public string BotAccessToken { get; set; }
-        
-        public HashSet<int> AllowedUsers { get; set; } = new HashSet<int>();
-        
-        public HashSet<int> DebugLogUsers { get; set; } = new HashSet<int>();
+        public string BotAccessToken { get; init; } = null!;
+
+        public HashSet<int> AllowedUsers { get; init; } = new();
+
+        public HashSet<int> DebugLogUsers { get; init; } = new();
     }
 }

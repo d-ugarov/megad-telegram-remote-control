@@ -1,4 +1,5 @@
 ﻿using MegaDTelegramRemoteControl.Infrastructure.Helpers;
+using MegaDTelegramRemoteControl.Models.Device.Enums;
 
 namespace MegaDTelegramRemoteControl.Models.Device
 {

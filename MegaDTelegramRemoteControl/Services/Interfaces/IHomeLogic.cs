@@ -7,6 +7,6 @@ namespace MegaDTelegramRemoteControl.Services.Interfaces
 {
     public interface IHomeLogic
     {
-        Task<OperationResult<OnNewEventResult>> OnNewEventAsync(string deviceId, List<(string key, string value)> query);
+        Task<OperationResult<OnNewEventResult>> OnNewEventAsync(string deviceId, IReadOnlyCollection<(string key, string value)> eventData);
     }
 }

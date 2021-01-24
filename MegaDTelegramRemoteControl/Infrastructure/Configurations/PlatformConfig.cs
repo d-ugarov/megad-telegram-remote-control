@@ -1,7 +1,7 @@
 ﻿namespace MegaDTelegramRemoteControl.Infrastructure.Configurations
 {
-    public class PlatformConfig
+    public record PlatformConfig
     {
-        public bool UseFakeDeviceConnector { get; set; }
+        public bool UseFakeDeviceConnector { get; init; }
     }
 }

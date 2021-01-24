@@ -8,8 +8,8 @@ namespace MegaDTelegramRemoteControl.Models
 {
     public class HomeConfig
     {
-        public Dictionary<string, Device.Device> Devices { get; set; }
-        public List<Location> Locations { get; set; }
+        public Dictionary<string, Device.Device> Devices { get; set; } = new();
+        public List<Location> Locations { get; set; } = new();
         
         public override string ToString()
         {

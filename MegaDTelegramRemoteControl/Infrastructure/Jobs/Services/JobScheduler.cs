@@ -15,16 +15,16 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Jobs.Services
 {
     public class JobScheduler : IHostedService, IDisposable
     {
-        private IServiceProvider Services { get; }
+        private readonly IServiceProvider services;
         private readonly InternalSchedulerConfig configuration;
         private readonly ILogger<JobScheduler> logger;
 
         private readonly Dictionary<JobType, Job> activeJobs;
-        private volatile bool canWork = false;
+        private volatile bool canWork;
         
         public JobScheduler(IServiceProvider services, InternalSchedulerConfig configuration, ILogger<JobScheduler> logger)
         {
-            this.Services = services;
+            this.services = services;
             this.configuration = configuration;
             this.logger = logger;
 
@@ -35,7 +35,7 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Jobs.Services
         {
             return Task.FromResult(InvokeOperations.InvokeOperation(() =>
             {
-                using var scope = Services.CreateScope();
+                using var scope = services.CreateScope();
                 canWork = true;
 
                 if (configuration?.Jobs != null)
@@ -50,7 +50,7 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Jobs.Services
                                               {
                                                   Timer = new Timer(async state => await ProcessJobAsync(state),
                                                       jobType, jobTypeInfo.DueTime, jobTypeInfo.Period),
-                                                  Interval = jobTypeInfo.Interval
+                                                  Interval = jobTypeInfo.Interval,
                                               };
                     }
                 }
@@ -87,19 +87,19 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Jobs.Services
             }
         }
 
-        private async Task ProcessJobAsync(object state)
+        private async Task ProcessJobAsync(object? state)
         {
-            Job job = null;
+            Job? job = null;
 
             await InvokeOperations.InvokeOperationAsync(async () =>
             {
-                var type = (JobType)state;
+                var type = (JobType)(state ?? throw new Exception("Empty job type"));
                 if (!activeJobs.TryGetValue(type, out job))
                     throw new Exception($"Can't find job with type {type}");
 
                 job.Timer?.Change(Timeout.Infinite, Timeout.Infinite);
 
-                using var scope = Services.CreateScope();
+                using var scope = services.CreateScope();
                 
                 switch (type)
                 {
@@ -115,7 +115,7 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Jobs.Services
 
         #region Jobs
 
-        public Task ProcessOtherJobsAsync(IServiceScope scope)
+        private Task ProcessOtherJobsAsync(IServiceScope scope)
         {
             return Task.CompletedTask;
         }

@@ -1,4 +1,5 @@
 ﻿using MegaDTelegramRemoteControl.Models.Device;
+using MegaDTelegramRemoteControl.Models.Device.Enums;
 using MegaDTelegramRemoteControl.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using System;
@@ -29,6 +30,9 @@ namespace MegaDTelegramRemoteControl.Services
         {
             try
             {
+                if (!deviceEvent.IsParsedSuccessfully)
+                    return;
+                
                 locker.EnterWriteLock();
 
                 switch (deviceEvent.Type)
@@ -54,22 +58,21 @@ namespace MegaDTelegramRemoteControl.Services
 
         private void SetDeviceStarted(DeviceEvent deviceEvent)
         {
-            current.Remove(deviceEvent.Device);
+            current.Remove(deviceEvent.Device!);
         }
 
         private void SetPortEvent(DeviceEvent deviceEvent)
         {
-            if (!current.TryGetValue(deviceEvent.Device, out var statePorts))
+            if (!current.TryGetValue(deviceEvent.Device!, out var statePorts))
             {
                 statePorts = new Dictionary<DevicePort, List<DevicePortEvent>>();
-                current.Add(deviceEvent.Device, statePorts);
+                current.Add(deviceEvent.Device!, statePorts);
             }
 
-            if (!statePorts.TryGetValue(deviceEvent.Event.Port, out var events))
+            if (!statePorts.TryGetValue(deviceEvent.Event!.Port, out var events))
             {
                 events = new List<DevicePortEvent>();
                 statePorts[deviceEvent.Event.Port] = events;
-                
             }
 
             events.Add(deviceEvent.Event);
@@ -79,7 +82,7 @@ namespace MegaDTelegramRemoteControl.Services
 
         #region Get
 
-        public DevicePortEvent Get(DevicePort port)
+        public DevicePortEvent? Get(DevicePort port)
         {
             try
             {

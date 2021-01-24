@@ -18,12 +18,12 @@ namespace MegaDTelegramRemoteControl.Controllers
         [Route("megad/{id}")]
         public async Task<IActionResult> OnNewEvent(string id)
         {
-            var query = Request.Query.Select(x => (x.Key, x.Value.ToString())).ToList();
+            var eventData = Request.Query.Select(x => (x.Key, x.Value.ToString())).ToList();
 
-            var result = await homeLogic.OnNewEventAsync(id, query);
+            var result = await homeLogic.OnNewEventAsync(id, eventData);
             
-            if (result.IsSuccess && result.Data.SendCustomCommand)
-                return Ok(result.Data.Command);
+            if (result.IsSuccess && result.Data!.SendCustomCommand)
+                return Ok(result.Data!.Command);
             
             return Ok("d");
         }

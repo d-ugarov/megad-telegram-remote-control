@@ -8,17 +8,17 @@ using System.Threading.Tasks;
 using Device = MegaDTelegramRemoteControl.Models.Device.Device;
 using DevicePort = MegaDTelegramRemoteControl.Models.Device.DevicePort;
 
-namespace MegaDTelegramRemoteControl.Services
+namespace MegaDTelegramRemoteControl.Services.MegaDServices
 {
-    public class DeviceConnector : IDeviceConnector
+    public class MegaDConnector : IDeviceConnector
     {
         private readonly HttpClient httpClient;
-        private readonly IDeviceDataParser deviceDataParser;
+        private readonly IDeviceEventParser deviceEventParser;
         
-        public DeviceConnector(HttpClient httpClient, IDeviceDataParser deviceDataParser)
+        public MegaDConnector(HttpClient httpClient, IDeviceEventParser deviceEventParser)
         {
             this.httpClient = httpClient;
-            this.deviceDataParser = deviceDataParser;
+            this.deviceEventParser = deviceEventParser;
         }
 
         public Task<OperationResult<DevicePortStatus>> GetPortStatusAsync(DevicePort port)
@@ -28,7 +28,7 @@ namespace MegaDTelegramRemoteControl.Services
                 var query = $"?pt={port.Id}&cmd=get";
                 var data = await SendRequestAsync(port.Device, query);
 
-                return deviceDataParser.ParseStatus(port, data);
+                return deviceEventParser.ParseStatus(port, data);
             });
         }
 

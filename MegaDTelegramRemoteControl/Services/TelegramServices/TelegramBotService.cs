@@ -12,12 +12,12 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace MegaDTelegramRemoteControl.Services
+namespace MegaDTelegramRemoteControl.Services.TelegramServices
 {
     public class TelegramBotService : IBotService
     {
         private readonly TelegramConfig telegramConfig;
-        private TelegramBotClient bot;
+        private TelegramBotClient bot = null!;
         
         private readonly IBotHandler botHandler;
         private readonly ILogger<TelegramBotService> logger;
@@ -41,13 +41,13 @@ namespace MegaDTelegramRemoteControl.Services
                 logger.LogTrace("TelegramBot starting..");
                 
                 bot = new TelegramBotClient(telegramConfig.BotAccessToken);
-                bot.OnMessage += OnMessageReceived;
-                bot.OnCallbackQuery += OnCallbackQueryReceived;
+                bot.OnMessage += async (_, args) => await OnMessageReceivedAsync(args);
+                bot.OnCallbackQuery += async (_, args) => await OnCallbackQueryReceivedAsync(args);
                 bot.StartReceiving();
 
                 await bot.SetMyCommandsAsync(new List<BotCommand>
                                              {
-                                                 new BotCommand
+                                                 new()
                                                  {
                                                      Command = "dashboard",
                                                      Description = "Dashboard"
@@ -70,9 +70,9 @@ namespace MegaDTelegramRemoteControl.Services
             });
         }
         
-        private async void OnMessageReceived(object sender, MessageEventArgs e)
+        private Task OnMessageReceivedAsync(MessageEventArgs e)
         {
-            await InvokeOperations.InvokeOperationAsync(async () =>
+            return InvokeOperations.InvokeOperationAsync(async () =>
             {
                 if (e.Message == null)
                     return;
@@ -82,10 +82,10 @@ namespace MegaDTelegramRemoteControl.Services
                                 $"From: {e.Message.From.Username} ({e.Message.From.Id}), " +
                                 $"allowed: {allowed}, " +
                                 $"message: {e.Message.Text}");
-                
+
                 if (!allowed)
                     return;
-                
+
                 await ProcessMessageAsync(e.Message);
             });
         }
@@ -98,18 +98,17 @@ namespace MegaDTelegramRemoteControl.Services
                 default:
                 {
                     var mainMenu = await botHandler.ProcessActionAsync();
-                    mainMenu.EnsureSuccess();
 
-                    var (text, inlineKeyboard) = GetFormattedAnswer(mainMenu.Data);
+                    var (text, inlineKeyboard) = GetFormattedAnswer(mainMenu);
                     await SendMessageAsync(text, inlineKeyboard, message.Chat);
                     break;
                 }
             }
         }
         
-        private async void OnCallbackQueryReceived(object sender, CallbackQueryEventArgs e)
+        private Task OnCallbackQueryReceivedAsync(CallbackQueryEventArgs e)
         {
-            await InvokeOperations.InvokeOperationAsync(async () =>
+            return InvokeOperations.InvokeOperationAsync(async () =>
             {
                 if (e.CallbackQuery == null)
                     return;
@@ -119,12 +118,12 @@ namespace MegaDTelegramRemoteControl.Services
                                 $"From: {e.CallbackQuery.From.Username} ({e.CallbackQuery.From.Id}), " +
                                 $"allowed: {allowed}, " +
                                 $"message: {e.CallbackQuery.Data}");
-                
+
                 if (!allowed)
                     return;
 
                 await bot.AnswerCallbackQueryAsync(e.CallbackQuery.Id);
-                
+
                 await ProcessCallbackQueryAsync(e.CallbackQuery);
             });
         }
@@ -132,10 +131,9 @@ namespace MegaDTelegramRemoteControl.Services
         private async Task ProcessCallbackQueryAsync(CallbackQuery callbackQuery)
         {
             var menu = await botHandler.ProcessActionAsync(callbackQuery.Data);
-            menu.EnsureSuccess();
             
             var chatId = new ChatId(callbackQuery.Message.Chat.Id);
-            var (text, inlineKeyboard) = GetFormattedAnswer(menu.Data);
+            var (text, inlineKeyboard) = GetFormattedAnswer(menu);
             
             await EditMessageAsync(text, inlineKeyboard, chatId, callbackQuery.Message);
         }
