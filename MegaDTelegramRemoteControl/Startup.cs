@@ -8,6 +8,7 @@ using MegaDTelegramRemoteControl.Infrastructure.Models;
 using MegaDTelegramRemoteControl.Services;
 using MegaDTelegramRemoteControl.Services.Interfaces;
 using MegaDTelegramRemoteControl.Services.MegaDServices;
+using MegaDTelegramRemoteControl.Services.PrivateOffices.AntiCaptcha;
 using MegaDTelegramRemoteControl.Services.StubServices;
 using MegaDTelegramRemoteControl.Services.TelegramServices;
 using Microsoft.AspNetCore.Builder;
@@ -70,12 +71,14 @@ namespace MegaDTelegramRemoteControl
 
             services.AddSingleton(_ => Configuration.GetSection(nameof(TelegramConfig)).Get<TelegramConfig>() ?? new());
             services.AddSingleton(_ => Configuration.GetSection(nameof(InternalSchedulerConfig)).Get<InternalSchedulerConfig>() ?? new());
+            
+            services.Configure<AntiCaptchaConfig>(Configuration.GetSection(nameof(AntiCaptchaConfig)));
         }
 
         private void ConfigureCustomServices(IServiceCollection services)
         {
             var platformConfig = Configuration.GetSection(nameof(PlatformConfig)).Get<PlatformConfig>() ?? new();
-            
+
             services.AddSingleton<IBotService, TelegramBotService>();
             services.AddTransient<IBotHandler, TelegramBotHandler>();
             services.AddTransient<IHomeLogic, HomeLogic>();
@@ -86,11 +89,13 @@ namespace MegaDTelegramRemoteControl
                 services.AddHttpClient<IDeviceConnector, MegaDConnector>();
             else
                 services.AddTransient<IDeviceConnector, StubDeviceConnector>();
-            
+
+            services.AddHttpClient<IAntiCaptchaService, AntiCaptchaService>();
+
             services.AddHostedService<InitService>();
             services.AddHostedService<JobScheduler>();
         }
-        
+
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
