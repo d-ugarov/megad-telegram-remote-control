@@ -17,6 +17,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.1" />
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.1" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.3" />
         <PackageReference Include="morelinq" Version="3.3.2" />
         <PackageReference Include="NLog" Version="4.7.15" />
         <PackageReference Include="NLog.Telegram.NetStandart" Version="1.0.0" />
@@ -30,10 +31,6 @@
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
             <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
         </Content>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Services\PrivateOffices\PES" />
     </ItemGroup>
 
 </Project>

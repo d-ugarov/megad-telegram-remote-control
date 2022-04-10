@@ -9,6 +9,7 @@ using MegaDTelegramRemoteControl.Services;
 using MegaDTelegramRemoteControl.Services.Interfaces;
 using MegaDTelegramRemoteControl.Services.MegaDServices;
 using MegaDTelegramRemoteControl.Services.PrivateOffices.AntiCaptcha;
+using MegaDTelegramRemoteControl.Services.PrivateOffices.PES;
 using MegaDTelegramRemoteControl.Services.StubServices;
 using MegaDTelegramRemoteControl.Services.TelegramServices;
 using Microsoft.AspNetCore.Builder;
@@ -71,6 +72,7 @@ namespace MegaDTelegramRemoteControl
 
             services.AddSingleton(_ => Configuration.GetSection(nameof(TelegramConfig)).Get<TelegramConfig>() ?? new());
             services.AddSingleton(_ => Configuration.GetSection(nameof(InternalSchedulerConfig)).Get<InternalSchedulerConfig>() ?? new());
+            services.AddSingleton(_ => Configuration.GetSection(nameof(PesConfig)).Get<PesConfig>() ?? new());
             
             services.Configure<AntiCaptchaConfig>(Configuration.GetSection(nameof(AntiCaptchaConfig)));
         }
@@ -91,6 +93,9 @@ namespace MegaDTelegramRemoteControl
                 services.AddTransient<IDeviceConnector, StubDeviceConnector>();
 
             services.AddHttpClient<IAntiCaptchaService, AntiCaptchaService>();
+            
+            services.AddTransient<IPesService, PesService>();
+            services.AddHttpClient<IPesConnector, PesConnector>();
 
             services.AddHostedService<InitService>();
             services.AddHostedService<JobScheduler>();

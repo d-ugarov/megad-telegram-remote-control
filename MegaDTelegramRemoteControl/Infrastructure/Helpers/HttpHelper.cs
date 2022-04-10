@@ -67,6 +67,13 @@ public static class HttpHelper
         response.EnsureSuccessStatusCode();
         return response.Content;
     }
+    
+    public static Task<HttpResponseMessage> SendRequestWithRawResponseAsync(this HttpClient client, string url, 
+        HttpMethod method, object? query = null, object? body = null, TimeSpan timeout = default, 
+        IEnumerable<(string key, string value)>? headers = null)
+    {
+        return client.SendRequestWithRawResponseAsync(url, method, ObjectToParametersList(query), body, timeout, headers);
+    }
 
     public static async Task<HttpResponseMessage> SendRequestWithRawResponseAsync(this HttpClient client, string url,
         HttpMethod method, IEnumerable<(string key, object? value)>? query, object? body = null,
