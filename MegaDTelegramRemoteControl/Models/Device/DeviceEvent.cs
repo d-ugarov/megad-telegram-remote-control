@@ -1,42 +1,51 @@
 ﻿using MegaDTelegramRemoteControl.Infrastructure.Models;
 using MegaDTelegramRemoteControl.Models.Device.Enums;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
-namespace MegaDTelegramRemoteControl.Models.Device
+namespace MegaDTelegramRemoteControl.Models.Device;
+
+public class DeviceEvent
 {
-    public class DeviceEvent
+    private DevicePortEvent? port;
+
+    public DeviceEventType Type { get; set; }
+
+    public bool IsParsedSuccessfully { get; set; }
+
+    public Device? Device { get; set; }
+
+    public DevicePortEvent? Event
     {
-        private DevicePortEvent? port;
-        
-        public DeviceEventType Type { get; set; }
-        
-        public bool IsParsedSuccessfully { get; set; }
+        get => Type == DeviceEventType.PortEvent
+            ? port
+            : throw new OperationException($"Port is not available for event type {Type}");
+        set => port = value;
+    }
 
-        public Device? Device { get; init; }
+    public IReadOnlyCollection<NewEventData> EventData { get; }
 
-        public DevicePortEvent? Event
-        {
-            get => Type == DeviceEventType.PortEvent
-                ? port
-                : throw new OperationException($"Port is not available for event type {Type}");
-            set => port = value;
-        }
-        
-        public static DeviceEvent UnknownEvent => new() {Type = DeviceEventType.Unknown};
-        
-        public override string ToString()
-        {
-            var str = new StringBuilder($"Event: {Type}");
+    public DeviceEvent(IReadOnlyCollection<NewEventData> eventData)
+    {
+        EventData = eventData;
+    }
 
-            if (Device != null)
-                str.Append($", device: {Device.Name}");
+    public override string ToString()
+    {
+        var str = new StringBuilder($"Event: {Type}");
 
-            if (port?.Port != null)
-                str.Append($", {port}");
+        str.Append(IsParsedSuccessfully ? " (parsed)" : " (unknown)");
 
-            str.Append(IsParsedSuccessfully ? " (ok)" : " (error)");
+        if (Device != null)
+            str.Append($", device: {Device.Name}");
 
-            return str.ToString();
-        }
+        if (port?.Port != null)
+            str.Append($", {port}");
+
+        if (!IsParsedSuccessfully && EventData.Any())
+            str.Append($", event data: {string.Join(", ", EventData.Select(x => $"{x.Key}={x.Value}"))}");
+
+        return str.ToString();
     }
 }

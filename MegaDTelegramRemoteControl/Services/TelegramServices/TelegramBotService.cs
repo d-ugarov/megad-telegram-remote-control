@@ -58,17 +58,6 @@ namespace MegaDTelegramRemoteControl.Services.TelegramServices
                 logger.LogTrace("TelegramBot started");
             });
         }
-
-        public Task SendDebugTextMessageAsync(string message)
-        {
-            return InvokeOperations.InvokeOperationAsync(async () =>
-            {
-                foreach (var chatId in telegramConfig.DebugLogUsers)
-                {
-                    await bot.SendTextMessageAsync(chatId, message);
-                }
-            });
-        }
         
         private Task OnMessageReceivedAsync(MessageEventArgs e)
         {
@@ -144,13 +133,20 @@ namespace MegaDTelegramRemoteControl.Services.TelegramServices
                               .GroupBy(x => x.Order, (k, v) => new
                                                                {
                                                                    Order = k,
-                                                                   Row = v.Select(x => InlineKeyboardButton.WithCallbackData(x.Name, x.Id))
+                                                                   Row = v.Select(x =>
+                                                                       InlineKeyboardButton.WithCallbackData(x.Name,
+                                                                           x.Id))
                                                                })
                               .OrderBy(x => x.Order)
                               .Select(x => x.Row)
                               .ToList();
 
-            var inlineKeyboard = new InlineKeyboardMarkup(buttons);
+            var buttons1 = menu.Buttons
+                               .OrderBy(x => x.Order)
+                               .Select(x => new List<InlineKeyboardButton>{InlineKeyboardButton.WithCallbackData(x.Name, x.Id)})
+                               .ToList();
+
+            var inlineKeyboard = new InlineKeyboardMarkup(buttons1);
 
             return (menu.Text, inlineKeyboard);
         }

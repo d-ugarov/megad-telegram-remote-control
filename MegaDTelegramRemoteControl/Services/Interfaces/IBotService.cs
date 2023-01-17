@@ -1,11 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace MegaDTelegramRemoteControl.Services.Interfaces
+namespace MegaDTelegramRemoteControl.Services.Interfaces;
+
+public interface IBotService
 {
-    public interface IBotService
-    {
-        Task InitBotAsync();
-        
-        Task SendDebugTextMessageAsync(string message);
-    }
+    Task InitBotAsync();
 }

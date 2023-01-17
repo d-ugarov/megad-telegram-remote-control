@@ -47,6 +47,7 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Helpers
                                   {
                                       Ip = device.Ip,
                                       Name = device.Name,
+                                      Pwd = device.Pwd,
                                   };
 
                 foreach (var port in device.DevicePorts)
@@ -55,6 +56,7 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Helpers
                                                  {
                                                      Id = port.Id,
                                                      Name = port.Name,
+                                                     Description = port.Description,
                                                      Type = port.Type,
                                                      OutMode = port.OutMode,
                                                      OutModeIcons = port.OutModeIcons,

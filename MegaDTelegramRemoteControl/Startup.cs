@@ -36,10 +36,17 @@ namespace MegaDTelegramRemoteControl
         {
             services.Configure<KestrelServerOptions>(x =>
             {
-                var kestrelConfig = Configuration.GetSection(nameof(Kestrel)).Get<Kestrel>();
+                var kestrel = Configuration.GetSection(nameof(Kestrel)).Get<Kestrel>();
 
-                if (!string.IsNullOrEmpty(kestrelConfig?.Url))
-                    x.Listen(IPAddress.Parse(kestrelConfig.Url), kestrelConfig.Port);
+                switch (kestrel)
+                {
+                    case {Url: not null or "", Port: > 0}:
+                        x.Listen(IPAddress.Parse(kestrel.Url), kestrel.Port);
+                        break;
+                    case {Port: > 0}:
+                        x.Listen(IPAddress.Any, kestrel.Port);
+                        break;
+                }
             });
 
             services.AddMemoryCache()

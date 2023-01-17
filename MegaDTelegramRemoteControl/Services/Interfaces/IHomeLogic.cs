@@ -3,10 +3,9 @@ using MegaDTelegramRemoteControl.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace MegaDTelegramRemoteControl.Services.Interfaces
+namespace MegaDTelegramRemoteControl.Services.Interfaces;
+
+public interface IHomeLogic
 {
-    public interface IHomeLogic
-    {
-        Task<OperationResult<OnNewEventResult>> OnNewEventAsync(string deviceId, IReadOnlyCollection<(string key, string value)> eventData);
-    }
+    Task<OperationResult<NewEventResult>> OnNewEventAsync(string deviceId, IReadOnlyCollection<NewEventData> eventData);
 }

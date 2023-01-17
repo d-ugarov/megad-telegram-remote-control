@@ -17,6 +17,7 @@ namespace MegaDTelegramRemoteControl
             try
             {
                 logger.Info($"[Main:{Constants.InstanceId}] Application started");
+                logger.Fatal("Application started");
 
                 CreateHostBuilder(args).Build().Run();
             }
@@ -29,6 +30,7 @@ namespace MegaDTelegramRemoteControl
             finally
             {
                 logger.Info($"[Main:{Constants.InstanceId}] Application stopped");
+                logger.Fatal("Application stopped");
                 LogManager.Shutdown();
             }
         }
