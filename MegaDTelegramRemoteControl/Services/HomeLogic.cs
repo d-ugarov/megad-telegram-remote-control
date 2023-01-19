@@ -1,4 +1,5 @@
-﻿using MegaDTelegramRemoteControl.Infrastructure.Models;
+﻿using MegaDTelegramRemoteControl.Infrastructure.Configurations;
+using MegaDTelegramRemoteControl.Infrastructure.Models;
 using MegaDTelegramRemoteControl.Models;
 using MegaDTelegramRemoteControl.Services.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -14,6 +15,7 @@ public class HomeLogic : IHomeLogic
     private readonly IDeviceCommandParser deviceCommandParser;
     private readonly IDeviceConnector deviceConnector;
     private readonly IBotService botService;
+    private readonly IHomeLogicTriggerProcessor homeLogicTriggerProcessor;
     private readonly ILogger<HomeLogic> logger;
 
     public HomeLogic(HomeConfig homeConfig,
@@ -21,7 +23,8 @@ public class HomeLogic : IHomeLogic
         IDeviceCommandParser deviceCommandParser,
         IDeviceConnector deviceConnector,
         IBotService botService,
-        ILogger<HomeLogic> logger)
+        ILogger<HomeLogic> logger,
+        IHomeLogicTriggerProcessor homeLogicTriggerProcessor)
     {
         this.homeConfig = homeConfig;
         this.homeState = homeState;
@@ -29,6 +32,7 @@ public class HomeLogic : IHomeLogic
         this.deviceConnector = deviceConnector;
         this.botService = botService;
         this.logger = logger;
+        this.homeLogicTriggerProcessor = homeLogicTriggerProcessor;
     }
 
     public Task<OperationResult<NewEventResult>> OnNewEventAsync(string deviceId, IReadOnlyCollection<NewEventData> eventData)
@@ -43,9 +47,15 @@ public class HomeLogic : IHomeLogic
             if (!deviceEvent.IsParsedSuccessfully)
                 return NewEventResult.Default;
 
-            homeState.Set(deviceEvent);
+            var triggerResult = await homeLogicTriggerProcessor.ProcessAsync(deviceEvent);
 
-            return new NewEventResult();
+            // homeState.Set(deviceEvent);
+
+            return triggerResult switch
+            {
+                TriggerResult.DoNothing => NewEventResult.DoNothing,
+                _ => NewEventResult.Default,
+            };
         });
     }
 }

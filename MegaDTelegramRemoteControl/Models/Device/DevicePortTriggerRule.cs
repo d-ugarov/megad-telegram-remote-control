@@ -1,19 +1,20 @@
 ﻿using MegaDTelegramRemoteControl.Infrastructure.Configurations;
 using System.Collections.Generic;
 
-namespace MegaDTelegramRemoteControl.Models.Device
-{
-    public record DevicePortTriggerRule
-    {
-        public TriggerRuleSourcePortStatus SourcePortStatus { get; init; } = null!;
-        public List<AdditionalDevicePortTriggerRule> AdditionalConditions { get; init; } = new();
-        public TriggerRuleMode Mode { get; init; }
-        public TriggerRuleAction Action { get; init; } = null!;
-    }
+namespace MegaDTelegramRemoteControl.Models.Device;
 
-    public record AdditionalDevicePortTriggerRule
-    {
-        public DevicePort DevicePort { get; init; } = null!;
-        public TriggerRuleSourcePortStatus SourcePortStatus { get; init; } = null!;
-    }
+public record DevicePortTriggerRule
+{
+    public required TriggerRuleSourcePortStatus SourcePortStatus { get; init; }
+    public required TriggerRuleMode Mode { get; init; }
+    public required TriggerRuleAction Action { get; init; }
+    public required TriggerResult Result { get; init; }
+    public required DevicePort DestinationPort { get; init; }
+    public List<AdditionalDevicePortTriggerRule> AdditionalConditions { get; init; } = new();
+}
+
+public record AdditionalDevicePortTriggerRule
+{
+    public required DevicePort DevicePort { get; init; }
+    public required TriggerRuleSourcePortStatus SourcePortStatus { get; init; }
 }

@@ -1,11 +1,11 @@
 ﻿using MegaDTelegramRemoteControl.Models.Device.Enums;
 
-namespace MegaDTelegramRemoteControl.Models.Device
-{
-    public class DevicePortAction
-    {
-        public DeviceOutPortCommand? SWCommand { get; set; }
+namespace MegaDTelegramRemoteControl.Models.Device;
 
-        public static DevicePortAction DefaultSWSwitch => new() {SWCommand = DeviceOutPortCommand.Switch};
-    }
+public record DevicePortAction
+{
+    public DeviceOutPortCommand? SWCommand { get; private init; }
+
+    public static DevicePortAction CommandSWDefault => new() {SWCommand = DeviceOutPortCommand.Switch};
+    public static DevicePortAction CommandSW(DeviceOutPortCommand command) => new() {SWCommand = command};
 }

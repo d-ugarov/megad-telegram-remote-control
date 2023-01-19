@@ -4,16 +4,16 @@ using System.Collections.Generic;
 
 namespace MegaDTelegramRemoteControl.Models.Device;
 
-public class DevicePort
+public record DevicePort
 {
     private readonly DeviceOutPortMode? outMode;
 
-    public string Id { get; init; } = null!;
-    public DevicePortType Type { get; init; }
-    public string Name { get; init; } = null!;
-    public string? Description { get; init; }
+    public required string Id { get; init; }
+    public required DevicePortType Type { get; init; }
+    public required string Name { get; init; }
+    public required string? Description { get; init; }
 
-    public DeviceOutPortMode? OutMode
+    public required DeviceOutPortMode? OutMode
     {
         get => Type == DevicePortType.OUT
             ? outMode
@@ -21,9 +21,11 @@ public class DevicePort
         init => outMode = value;
     }
 
-    public Dictionary<string, string> OutModeIcons { get; init; } = new();
+    public required Dictionary<string, string> OutModeIcons { get; init; }
 
-    public Device Device { get; init; } = null!;
+    public required Device Device { get; init; }
 
     public List<DevicePortTriggerRule> TriggerRules { get; init; } = new();
+
+    public override string ToString() => $"{Id} ({Type}, {Device.Name}, {Name})";
 }

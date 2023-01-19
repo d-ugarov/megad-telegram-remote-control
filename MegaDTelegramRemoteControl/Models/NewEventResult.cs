@@ -1,9 +1,11 @@
 ﻿namespace MegaDTelegramRemoteControl.Models;
 
-public class NewEventResult
+public record NewEventResult
 {
-    public static readonly NewEventResult Default = new() {SendCustomCommand = false};
+    public static NewEventResult Default => new() {SendCustomCommand = false};
+    public static NewEventResult DoNothing => new() {SendCustomCommand = true, Command = string.Empty};
+    public static NewEventResult CustomCommand(string command) => new() {SendCustomCommand = true, Command = command};
 
-    public string? Command { get; set; }
-    public bool SendCustomCommand { get; set; }
+    public bool SendCustomCommand { get; private init; }
+    public string? Command { get; private init; }
 }
