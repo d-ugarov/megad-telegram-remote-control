@@ -17,7 +17,7 @@ namespace MegaDTelegramRemoteControl.Services.StubServices
             this.deviceDataParser = deviceDataParser;
         }
 
-        public Task<OperationResult<DevicePortStatus>> GetPortStatusAsync(DevicePort port)
+        public Task<OperationResult<DevicePortStatus>> GetPortStatusAsync(DevicePort port, bool useCache = false)
         {
             return Task.FromResult(InvokeOperations.InvokeOperation(() =>
             {

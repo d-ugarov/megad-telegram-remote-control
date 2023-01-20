@@ -77,6 +77,7 @@ namespace MegaDTelegramRemoteControl
             LogManager.GetCurrentClassLogger().Info(homeConfig.ToString());
             services.AddSingleton(_ => homeConfig);
 
+            services.AddSingleton(_ => Configuration.GetSection(nameof(PlatformConfig)).Get<PlatformConfig>() ?? new());
             services.AddSingleton(_ => Configuration.GetSection(nameof(TelegramConfig)).Get<TelegramConfig>() ?? new());
             services.AddSingleton(_ => Configuration.GetSection(nameof(InternalSchedulerConfig)).Get<InternalSchedulerConfig>() ?? new());
             services.AddSingleton(_ => Configuration.GetSection(nameof(PesConfig)).Get<PesConfig>() ?? new());

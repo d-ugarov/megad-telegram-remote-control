@@ -98,6 +98,35 @@ public static class ConfigHelper
                                                      });
             }
 
+            if (trigger.AdditionalConditions != null)
+            {
+                var additionalConditions = new AdditionalConditions
+                                           {
+                                               Type = trigger.AdditionalConditions.Type,
+                                               Status = trigger.AdditionalConditions.Status,
+                                           };
+
+                foreach (var additionalPort in trigger.AdditionalConditions.Ports)
+                {
+                    if (!TryGetPort(additionalPort.DeviceId, additionalPort.PortId, out var sourcePort))
+                    {
+                        logger.Warn($"Can't find additional source device/port for trigger {trigger}");
+                        continue;
+                    }
+
+                    if (sourcePort.Type != DevicePortType.OUT)
+                    {
+                        logger.Warn($"Wrong additional {sourcePort} for trigger {trigger}");
+                        continue;
+                    }
+
+                    additionalConditions.Ports.Add(sourcePort);
+                }
+
+                if (additionalConditions.Ports.Any())
+                    portTrigger.AdditionalConditions = additionalConditions;
+            }
+
             if (portTrigger.DestinationPortRules.Any())
                 port.TriggerRules.Add(portTrigger);
         }

@@ -1,26 +1,44 @@
 ﻿using MegaDTelegramRemoteControl.Models.Device.Enums;
 using System;
-using System.Collections.Generic;
 
 namespace MegaDTelegramRemoteControl.Infrastructure.Configurations;
 
 public record AutomationConfig
 {
-    public List<TriggerRule> Triggers { get; init; } = new();
+    public TriggerRule[] Triggers { get; init; } = Array.Empty<TriggerRule>();
 }
 
 public record TriggerRule
 {
     public TriggerRuleSourcePortState SourcePortState { get; set; } = null!;
-    public List<TriggerRuleDestinationPortState> DestinationPortStates { get; set; } = null!;
+    public TriggerRuleAdditionalConditions? AdditionalConditions { get; set; }
+    public TriggerRuleDestinationPortState[] DestinationPortStates { get; set; } = null!;
     public TriggerResult Result { get; init; }
 }
 
-public record TriggerRuleSourcePortState
+public record TriggerRulePort
 {
     public string DeviceId { get; init; } = null!;
     public string PortId { get; init; } = null!;
+}
+
+public record TriggerRuleSourcePortState : TriggerRulePort
+{
     public TriggerRuleSourcePortStatus Status { get; init; } = null!;
+}
+
+public record TriggerRuleAdditionalConditions
+{
+    public TriggerRulePort[] Ports { get; set; } = Array.Empty<TriggerRulePort>();
+    public ConditionType Type { get; set; }
+    public SWStatus? Status { get; set; }
+}
+
+public enum ConditionType
+{
+    StatesAreEqual,
+    StatesAnyEqual,
+    StatesNotEqual,
 }
 
 public record TriggerRuleDestinationPortState
@@ -32,8 +50,8 @@ public record TriggerRuleDestinationPortState
 
 public record TriggerRuleSourcePortStatus
 {
-    public IEnumerable<SWStatus> SWStatuses { get; init; } = Array.Empty<SWStatus>();
-    public IEnumerable<DeviceInPortCommand> InPortCommands { get; init; } = Array.Empty<DeviceInPortCommand>();
+    public SWStatus[] SWStatuses { get; init; } = Array.Empty<SWStatus>();
+    public DeviceInPortCommand[] InPortCommands { get; init; } = Array.Empty<DeviceInPortCommand>();
 }
 
 public record TriggerRuleAction

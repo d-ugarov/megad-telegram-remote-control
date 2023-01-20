@@ -27,5 +27,6 @@ public record DevicePort
 
     public List<DevicePortTriggerRule> TriggerRules { get; } = new();
 
-    public override string ToString() => $"port: {Description ?? Name} ({Type}, {Device.Name})";
+    public override string ToString() => $"port: {Description ?? Name} " +
+                                         $"({Type},{(Type == DevicePortType.OUT ? $" {outMode}," : "")} {Device.Name})";
 }

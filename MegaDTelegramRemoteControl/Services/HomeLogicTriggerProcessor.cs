@@ -4,6 +4,8 @@ using MegaDTelegramRemoteControl.Models.Device;
 using MegaDTelegramRemoteControl.Models.Device.Enums;
 using MegaDTelegramRemoteControl.Services.Interfaces;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -45,7 +47,8 @@ public class HomeLogicTriggerProcessor : IHomeLogicTriggerProcessor
             {
                 case DevicePortType.IN when triggerRule.SourcePortStatus
                                                        .InPortCommands
-                                                       .Contains(deviceEvent.Event.In!.Command):
+                                                       .Contains(deviceEvent.Event.In!.Command) &&
+                                            await CheckAdditionalConditionsAllowedAsync(triggerRule.AdditionalConditions):
                 {
                     foreach (var destinationPortRule in triggerRule.DestinationPortRules)
                     {
@@ -63,6 +66,37 @@ public class HomeLogicTriggerProcessor : IHomeLogicTriggerProcessor
         }
 
         return result;
+    }
+
+    private async Task<bool> CheckAdditionalConditionsAllowedAsync(AdditionalConditions? additionalConditions)
+    {
+        if (additionalConditions == null)
+            return true;
+        
+        var statuses = new List<SWStatus>();
+
+        foreach (var conditionsPort in additionalConditions.Ports)
+        {
+            var state = await deviceConnector.GetPortStatusAsync(conditionsPort, true);
+            if (state.IsSuccess)
+            {
+                statuses.Add(state.Data!.SWStatus);
+            }
+        }
+
+        return additionalConditions.Type switch
+        {
+            ConditionType.StatesAreEqual when additionalConditions.Status.HasValue => statuses.All(x => x == additionalConditions.Status.Value),
+            ConditionType.StatesAreEqual => statuses.Distinct().Count() == 1,
+
+            ConditionType.StatesAnyEqual when additionalConditions.Status.HasValue => statuses.Any(x => x == additionalConditions.Status.Value),
+            ConditionType.StatesAnyEqual => statuses.Distinct().Count() == 1,
+
+            ConditionType.StatesNotEqual when additionalConditions.Status.HasValue => statuses.All(x => x != additionalConditions.Status.Value),
+            ConditionType.StatesNotEqual => statuses.Distinct().Count() > 1,
+
+            _ => true,
+        };
     }
 
     private async Task ProcessDeviceInEventAsync(DestinationTriggerRule triggerRule)
