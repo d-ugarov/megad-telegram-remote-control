@@ -2,10 +2,10 @@
 
 public record NewEventResult
 {
-    public static NewEventResult Default => new() {SendCustomCommand = false};
-    public static NewEventResult DoNothing => new() {SendCustomCommand = true, Command = string.Empty};
-    public static NewEventResult CustomCommand(string command) => new() {SendCustomCommand = true, Command = command};
+    public static NewEventResult Default => new() {SendOk200 = false};
+    public static NewEventResult DoNothing => new() {SendOk200 = true};
+    public static NewEventResult CustomCommand(string command) => new() {SendOk200 = true, SendOk200Data = command};
 
-    public bool SendCustomCommand { get; private init; }
-    public string? Command { get; private init; }
+    public bool SendOk200 { get; private init; }
+    public string? SendOk200Data { get; private init; }
 }

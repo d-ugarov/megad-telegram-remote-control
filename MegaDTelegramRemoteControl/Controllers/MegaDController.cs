@@ -23,8 +23,14 @@ public class MegaDController : Controller
 
         var result = await homeLogic.OnNewEventAsync(id, eventData);
 
-        if (result.IsSuccess && result.Data!.SendCustomCommand)
-            return Ok(result.Data!.Command);
+        if (result.IsSuccess && result.Data!.SendOk200)
+        {
+            return result.Data!.SendOk200Data switch
+            {
+                not null => Ok(result.Data!.SendOk200Data),
+                _ => Ok(),
+            };
+        }
 
         return NoContent();
     }

@@ -1,8 +1,7 @@
-﻿namespace MegaDTelegramRemoteControl.Models.Device.Enums
+﻿namespace MegaDTelegramRemoteControl.Models.Device.Enums;
+
+public enum SWStatus
 {
-    public enum SWStatus
-    {
-        On, 
-        Off,
-    }
+    On, 
+    Off,
 }

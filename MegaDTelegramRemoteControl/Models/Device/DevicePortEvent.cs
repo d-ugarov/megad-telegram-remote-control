@@ -18,7 +18,7 @@ public class DevicePortEvent
     {
         get => Port.Type == DevicePortType.IN
             ? inPortData
-            : throw new OperationException($"'IN' port data is not available for port type {Port?.Type}");
+            : throw new OperationException($"'IN' port data is not available for port type {Port.Type}");
         set => inPortData = value;
     }
 
@@ -26,7 +26,7 @@ public class DevicePortEvent
     {
         get => Port.Type == DevicePortType.OUT
             ? outPortData
-            : throw new OperationException($"'Out' port data is not available for port type {Port?.Type}");
+            : throw new OperationException($"'Out' port data is not available for port type {Port.Type}");
         set => outPortData = value;
     }
 

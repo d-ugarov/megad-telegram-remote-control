@@ -1,4 +1,5 @@
 ﻿using MegaDTelegramRemoteControl.Infrastructure.Configurations;
+using MegaDTelegramRemoteControl.Infrastructure.Models;
 using MegaDTelegramRemoteControl.Models.Device;
 using MegaDTelegramRemoteControl.Models.Device.Enums;
 using MegaDTelegramRemoteControl.Services.Interfaces;
@@ -23,7 +24,7 @@ public class HomeLogicTriggerProcessor : IHomeLogicTriggerProcessor
     {
         switch (deviceEvent.Type)
         {
-            case DeviceEventType.PortEvent:
+            case DeviceEventType.PortEvent when deviceEvent.Event!.Port.TriggerRules.Any():
             {
                 return ProcessDeviceEventAsync(deviceEvent);
             }
@@ -38,13 +39,20 @@ public class HomeLogicTriggerProcessor : IHomeLogicTriggerProcessor
     {
         var result = TriggerResult.Default;
 
-        foreach (var triggerRule in deviceEvent.Event!.Port.TriggerRules.Where(x => x.Mode == TriggerRuleMode.OnEvent))
+        foreach (var triggerRule in deviceEvent.Event!.Port.TriggerRules)
         {
             switch (deviceEvent.Event.Port.Type)
             {
-                case DevicePortType.IN:
+                case DevicePortType.IN when triggerRule.SourcePortStatus
+                                                       .InPortCommands
+                                                       .Contains(deviceEvent.Event.In!.Command):
                 {
-                    result = await ProcessDeviceInEventAsync(deviceEvent, triggerRule);
+                    foreach (var destinationPortRule in triggerRule.DestinationPortRules)
+                    {
+                        await ProcessDeviceInEventAsync(destinationPortRule);
+                    }
+
+                    result = triggerRule.Result;
                     break;
                 }
                 case DevicePortType.OUT:
@@ -57,24 +65,24 @@ public class HomeLogicTriggerProcessor : IHomeLogicTriggerProcessor
         return result;
     }
 
-    private async Task<TriggerResult> ProcessDeviceInEventAsync(DeviceEvent deviceEvent, DevicePortTriggerRule triggerRule)
+    private async Task ProcessDeviceInEventAsync(DestinationTriggerRule triggerRule)
     {
-        if (!triggerRule.SourcePortStatus.InPortCommands.Contains(deviceEvent.Event!.In!.Command))
-            return TriggerResult.Default;
-
-        switch (triggerRule.DestinationPort.OutMode)
+        switch (triggerRule.Port.OutMode)
         {
             case DeviceOutPortMode.SW when triggerRule.Action.SWCommand.HasValue:
             {
                 var command = DevicePortAction.CommandSW(triggerRule.Action.SWCommand.Value);
-                await deviceConnector.InvokePortActionAsync(triggerRule.DestinationPort, command);
-                
-                logger.LogTrace($"Trigger: set command {triggerRule.Action.SWCommand.Value} port {triggerRule.DestinationPort}");
-                
-                return triggerRule.Result;
+                var result = await deviceConnector.InvokePortActionAsync(triggerRule.Port, command);
+
+                logger.LogTrace($"Trigger: command {triggerRule.Action.SWCommand.Value}, " +
+                                $"{triggerRule.Port}: " +
+                                $"{result.Report()}");
+                logger.LogCritical($"Trigger: command {triggerRule.Action.SWCommand.Value}, " +
+                                   $"{triggerRule.Port}: " +
+                                   $"{result.Report()}");
+
+                break;
             }
         }
-
-        return TriggerResult.Default;
     }
 }

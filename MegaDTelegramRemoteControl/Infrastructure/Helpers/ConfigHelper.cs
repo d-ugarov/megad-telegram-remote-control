@@ -65,49 +65,41 @@ public static class ConfigHelper
 
         foreach (var trigger in automationConfig.Triggers)
         {
-            if (!TryGetPort(trigger.SourceDeviceId, trigger.SourcePortId, out var port))
+            if (!TryGetPort(trigger.SourcePortState.DeviceId, trigger.SourcePortState.PortId, out var port))
             {
                 logger.Warn($"Can't find source device/port for trigger {trigger}");
-                continue;
-            }
-            
-            if (!TryGetPort(trigger.DestinationDeviceId, trigger.DestinationPortId, out var destinationPort))
-            {
-                logger.Warn($"Can't find destination device/port for trigger {trigger}");
-                continue;
-            }
-
-            if (destinationPort.Type != DevicePortType.OUT)
-            {
-                logger.Warn($"Wrong destination port {port} for trigger {trigger}");
                 continue;
             }
 
             var portTrigger = new DevicePortTriggerRule
                               {
-                                  Action = trigger.Action,
-                                  Mode = trigger.Mode,
                                   Result = trigger.Result,
-                                  SourcePortStatus = trigger.SourcePortStatus,
-                                  DestinationPort = destinationPort,
+                                  SourcePortStatus = trigger.SourcePortState.Status,
                               };
 
-            foreach (var condition in trigger.AdditionalConditions)
+            foreach (var destinationPortState in trigger.DestinationPortStates)
             {
-                if (!TryGetPort(condition.SourceDeviceId, condition.SourcePortId, out var conditionPort))
+                if (!TryGetPort(destinationPortState.DeviceId, destinationPortState.PortId, out var destinationPort))
                 {
-                    logger.Warn($"Can't find device/port for trigger {trigger}");
+                    logger.Warn($"Can't find destination device/port for trigger {trigger}");
                     continue;
                 }
 
-                portTrigger.AdditionalConditions.Add(new AdditionalDevicePortTriggerRule
+                if (destinationPort.Type != DevicePortType.OUT)
+                {
+                    logger.Warn($"Wrong destination port {port} for trigger {trigger}");
+                    continue;
+                }
+
+                portTrigger.DestinationPortRules.Add(new DestinationTriggerRule
                                                      {
-                                                         DevicePort = conditionPort!,
-                                                         SourcePortStatus = condition.SourcePortStatus,
+                                                         Port = destinationPort,
+                                                         Action = destinationPortState.Action,
                                                      });
             }
 
-            port!.TriggerRules.Add(portTrigger);
+            if (portTrigger.DestinationPortRules.Any())
+                port.TriggerRules.Add(portTrigger);
         }
 
         return result;

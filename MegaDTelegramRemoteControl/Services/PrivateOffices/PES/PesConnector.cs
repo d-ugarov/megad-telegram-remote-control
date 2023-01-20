@@ -98,7 +98,7 @@ public class PesConnector : IPesConnector
     {
         var key = $"PesAuthTokensCache:{config.Username}";
 
-        if (!force && memoryCache.TryGetValue(key, out string token))
+        if (!force && memoryCache.TryGetValue(key, out string? token) && !string.IsNullOrEmpty(token))
             return token;
 
         var (jwt, lifetime) = await AuthorizeAsync(config);
