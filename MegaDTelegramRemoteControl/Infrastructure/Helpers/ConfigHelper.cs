@@ -73,8 +73,9 @@ public static class ConfigHelper
 
             var portTrigger = new DevicePortTriggerRule
                               {
-                                  Result = trigger.Result,
                                   SourcePortStatus = trigger.SourcePortState.Status,
+                                  Result = trigger.Result,
+                                  IsFinal = trigger.IsFinal,
                               };
 
             foreach (var destinationPortState in trigger.DestinationPortStates)
@@ -95,6 +96,12 @@ public static class ConfigHelper
                                                      {
                                                          Port = destinationPort,
                                                          Action = destinationPortState.Action,
+                                                         DelayAfterAction = destinationPortState.DelayAfterActionInMilliseconds > 0
+                                                             ? TimeSpan.FromMilliseconds(destinationPortState.DelayAfterActionInMilliseconds)
+                                                             : null,
+                                                         DelayBeforeAction = destinationPortState.DelayBeforeActionInMilliseconds > 0
+                                                             ? TimeSpan.FromMilliseconds(destinationPortState.DelayBeforeActionInMilliseconds)
+                                                             : null
                                                      });
             }
 

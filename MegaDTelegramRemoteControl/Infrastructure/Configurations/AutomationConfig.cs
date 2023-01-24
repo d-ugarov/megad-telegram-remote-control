@@ -14,6 +14,7 @@ public record TriggerRule
     public TriggerRuleAdditionalConditions? AdditionalConditions { get; set; }
     public TriggerRuleDestinationPortState[] DestinationPortStates { get; set; } = null!;
     public TriggerResult Result { get; init; }
+    public bool IsFinal { get; init; }
 }
 
 public record TriggerRulePort
@@ -46,6 +47,8 @@ public record TriggerRuleDestinationPortState
     public string DeviceId { get; init; } = null!;
     public string PortId { get; init; } = null!;
     public TriggerRuleAction Action { get; init; } = null!;
+    public int DelayBeforeActionInMilliseconds { get; init; }
+    public int DelayAfterActionInMilliseconds { get; init; }
 }
 
 public record TriggerRuleSourcePortStatus

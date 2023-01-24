@@ -52,10 +52,20 @@ public class HomeLogicTriggerProcessor : IHomeLogicTriggerProcessor
                 {
                     foreach (var destinationPortRule in triggerRule.DestinationPortRules)
                     {
+                        if (destinationPortRule.DelayBeforeAction.HasValue)
+                            await Task.Delay(destinationPortRule.DelayBeforeAction.Value);
+
                         await ProcessDeviceInEventAsync(destinationPortRule);
+
+                        if (destinationPortRule.DelayAfterAction.HasValue)
+                            await Task.Delay(destinationPortRule.DelayAfterAction.Value);
                     }
 
                     result = triggerRule.Result;
+
+                    if (triggerRule.IsFinal)
+                        return result;
+
                     break;
                 }
                 case DevicePortType.OUT:
