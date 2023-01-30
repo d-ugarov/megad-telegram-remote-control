@@ -5,8 +5,8 @@ namespace MegaDTelegramRemoteControl.Models.Device;
 
 public class DevicePortStatus
 {
-    public DevicePort Port { get; init; } = null!;
-    public SWStatus SWStatus { get; init; }
+    public required DevicePort Port { get; init; }
+    public required SWStatus SWStatus { get; init; }
 
     public override string ToString()
     {

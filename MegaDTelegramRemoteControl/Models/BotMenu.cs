@@ -1,17 +1,16 @@
 ﻿using System.Collections.Generic;
 
-namespace MegaDTelegramRemoteControl.Models
-{
-    public class BotMenu
-    {
-        public string Text { get; set; } = null!;
-        public List<ButtonItem> Buttons { get; set; } = new();
-    }
+namespace MegaDTelegramRemoteControl.Models;
 
-    public class ButtonItem
-    {
-        public string Name { get; set; } = null!;
-        public string Id { get; set; } = null!;
-        public int Order { get; set; }
-    }
+public record BotMenu
+{
+    public required string Text { get; init; }
+    public List<ButtonItem> Buttons { get; init; } = new();
+}
+
+public record ButtonItem
+{
+    public required string Name { get; set; }
+    public required string Id { get; init; }
+    public int Order { get; init; }
 }

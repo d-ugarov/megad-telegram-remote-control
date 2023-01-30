@@ -1,10 +1,9 @@
-﻿namespace MegaDTelegramRemoteControl.Models.Device
+﻿namespace MegaDTelegramRemoteControl.Models.Device;
+
+public class LocationItems
 {
-    public class LocationItems
-    {
-        public string Id { get; init; } = null!;
-        public string? CustomName { get; init; }
-        public Device Device { get; init; } = null!;
-        public DevicePort Port { get; init; } = null!;
-    }
+    public required string Id { get; init; }
+    public required string? CustomName { get; init; }
+    public required Device Device { get; init; }
+    public required DevicePort Port { get; init; }
 }

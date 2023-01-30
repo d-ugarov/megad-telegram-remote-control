@@ -1,8 +1,7 @@
-﻿namespace MegaDTelegramRemoteControl.Infrastructure.Models
+﻿namespace MegaDTelegramRemoteControl.Infrastructure.Models;
+
+public enum ErrorCodes
 {
-    public enum ErrorCodes
-    {
-        InternalServerError = 0,
-        ValidationError = 1,
-    }
+    InternalServerError = 0,
+    ValidationError = 1,
 }

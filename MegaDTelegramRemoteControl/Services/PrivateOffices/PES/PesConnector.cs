@@ -5,6 +5,7 @@ using MegaDTelegramRemoteControl.Models.AntiCaptcha;
 using MegaDTelegramRemoteControl.Models.PES;
 using MegaDTelegramRemoteControl.Services.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using System;
 using System.Collections.Generic;
@@ -30,12 +31,15 @@ public class PesConnector : IPesConnector
     
     private static readonly TimeSpan defaultTimeout = TimeSpan.FromSeconds(30);
 
-    public PesConnector(HttpClient httpClient, IMemoryCache memoryCache, IAntiCaptchaService antiCaptchaService, PesConfig pesConfig)
+    public PesConnector(HttpClient httpClient,
+        IMemoryCache memoryCache,
+        IAntiCaptchaService antiCaptchaService,
+        IOptions<PesConfig> pesConfig)
     {
         this.httpClient = httpClient;
         this.memoryCache = memoryCache;
         this.antiCaptchaService = antiCaptchaService;
-        this.pesCommonConfig = pesConfig.CommonConfig;
+        this.pesCommonConfig = pesConfig.Value.CommonConfig;
     }
 
     public Task<OperationResult<List<PesGroup>>> GetGroupsAsync(PesClientConfig config)

@@ -8,11 +8,11 @@ namespace MegaDTelegramRemoteControl.Controllers;
 
 public class MegaDController : Controller
 {
-    private readonly IHomeLogic homeLogic;
+    private readonly IMegaDEventsHandler megaDEventsHandler;
 
-    public MegaDController(IHomeLogic homeLogic)
+    public MegaDController(IMegaDEventsHandler megaDEventsHandler)
     {
-        this.homeLogic = homeLogic;
+        this.megaDEventsHandler = megaDEventsHandler;
     }
 
     [HttpGet]
@@ -21,7 +21,7 @@ public class MegaDController : Controller
     {
         var eventData = Request.Query.Select(x => new NewEventData(x.Key, x.Value.ToString())).ToList();
 
-        var result = await homeLogic.OnNewEventAsync(id, eventData);
+        var result = await megaDEventsHandler.OnNewEventAsync(id, eventData);
 
         if (result.IsSuccess && result.Data!.SendOk200)
         {

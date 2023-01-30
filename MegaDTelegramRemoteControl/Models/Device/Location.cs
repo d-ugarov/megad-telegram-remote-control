@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 
-namespace MegaDTelegramRemoteControl.Models.Device
+namespace MegaDTelegramRemoteControl.Models.Device;
+
+public class Location
 {
-    public class Location
-    {
-        public string Name { get; init; } = null!;
-        public string Id { get; init; } = null!;
-        public List<LocationItems> Items { get; init; } = new();
-        public Location? Parent { get; init; }
-        public List<Location> SubLocations { get; init; } = new();
-    }
+    public required string Name { get; init; }
+    public required string Id { get; init; }
+    public required Location? Parent { get; init; }
+    public List<LocationItems> Items { get; } = new();
+    public List<Location> SubLocations { get; } = new();
 }

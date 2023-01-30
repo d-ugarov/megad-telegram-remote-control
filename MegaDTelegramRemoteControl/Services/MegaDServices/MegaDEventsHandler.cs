@@ -6,33 +6,30 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace MegaDTelegramRemoteControl.Services;
+namespace MegaDTelegramRemoteControl.Services.MegaDServices;
 
-public class HomeLogic : IHomeLogic
+public class MegaDEventsHandler : IMegaDEventsHandler
 {
-    private readonly HomeConfig homeConfig;
-    private readonly IHomeState homeState;
+    private readonly IHomeService homeService;
     private readonly IDeviceCommandParser deviceCommandParser;
     private readonly IDeviceConnector deviceConnector;
     private readonly IBotService botService;
-    private readonly IHomeLogicTriggerProcessor homeLogicTriggerProcessor;
-    private readonly ILogger<HomeLogic> logger;
+    private readonly IHomeTriggerProcessor homeTriggerProcessor;
+    private readonly ILogger<MegaDEventsHandler> logger;
 
-    public HomeLogic(HomeConfig homeConfig,
-        IHomeState homeState,
+    public MegaDEventsHandler(IHomeService homeService,
         IDeviceCommandParser deviceCommandParser,
         IDeviceConnector deviceConnector,
         IBotService botService,
-        ILogger<HomeLogic> logger,
-        IHomeLogicTriggerProcessor homeLogicTriggerProcessor)
+        ILogger<MegaDEventsHandler> logger,
+        IHomeTriggerProcessor homeTriggerProcessor)
     {
-        this.homeConfig = homeConfig;
-        this.homeState = homeState;
+        this.homeService = homeService;
         this.deviceCommandParser = deviceCommandParser;
         this.deviceConnector = deviceConnector;
         this.botService = botService;
         this.logger = logger;
-        this.homeLogicTriggerProcessor = homeLogicTriggerProcessor;
+        this.homeTriggerProcessor = homeTriggerProcessor;
     }
 
     public Task<OperationResult<NewEventResult>> OnNewEventAsync(string deviceId, IReadOnlyCollection<NewEventData> eventData)
@@ -47,7 +44,7 @@ public class HomeLogic : IHomeLogic
             if (!deviceEvent.IsParsedSuccessfully)
                 return NewEventResult.Default;
 
-            var triggerResult = await homeLogicTriggerProcessor.ProcessAsync(deviceEvent);
+            var triggerResult = await homeTriggerProcessor.ProcessAsync(deviceEvent);
 
             // homeState.Set(deviceEvent);
 

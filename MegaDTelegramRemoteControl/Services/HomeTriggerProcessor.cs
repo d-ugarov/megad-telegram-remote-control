@@ -4,19 +4,18 @@ using MegaDTelegramRemoteControl.Models.Device;
 using MegaDTelegramRemoteControl.Models.Device.Enums;
 using MegaDTelegramRemoteControl.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace MegaDTelegramRemoteControl.Services;
 
-public class HomeLogicTriggerProcessor : IHomeLogicTriggerProcessor
+public class HomeTriggerProcessor : IHomeTriggerProcessor
 {
     private readonly IDeviceConnector deviceConnector;
-    private readonly ILogger<HomeLogicTriggerProcessor> logger;
+    private readonly ILogger<HomeTriggerProcessor> logger;
 
-    public HomeLogicTriggerProcessor(IDeviceConnector deviceConnector, ILogger<HomeLogicTriggerProcessor> logger)
+    public HomeTriggerProcessor(IDeviceConnector deviceConnector, ILogger<HomeTriggerProcessor> logger)
     {
         this.deviceConnector = deviceConnector;
         this.logger = logger;

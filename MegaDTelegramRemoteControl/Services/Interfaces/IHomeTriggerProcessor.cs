@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace MegaDTelegramRemoteControl.Services.Interfaces;
 
-public interface IHomeLogicTriggerProcessor
+public interface IHomeTriggerProcessor
 {
     Task<TriggerResult> ProcessAsync(DeviceEvent deviceEvent);
 }

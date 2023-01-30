@@ -1,4 +1,5 @@
 ﻿using MegaDTelegramRemoteControl.Infrastructure.Models;
+using NLog;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,69 +16,104 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Helpers;
 
 public static class HttpHelper
 {
+    private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
     public static Task<OperationResult<HttpContent>> SendRequestSafeAsync(this HttpClient client, string url,
-        HttpMethod method, object? query = null, object? body = null, TimeSpan timeout = default, 
-        IEnumerable<(string key, string value)>? headers = null, JsonSerializerOptions? jsonSerializerOptions = null)
+        HttpMethod method, object? query = null, object? body = null, TimeSpan timeout = default, bool logErrors = true,
+        IEnumerable<(string key, string value)>? headers = null,
+        JsonSerializerOptions? jsonSerializerOptions = null, bool throwErrorsFromContent = true)
     {
         return InvokeOperations.InvokeOperationAsync(() =>
         {
-            return client.SendRequestAsync(url, method, ObjectToParametersList(query), body, timeout, headers, jsonSerializerOptions);
+            return client.SendRequestAsync(url, method, ObjectToParametersList(query), body, timeout, logErrors,
+                headers, jsonSerializerOptions, throwErrorsFromContent);
         });
     }
 
     public static Task<OperationResult<T>> SendRequestSafeAsync<T>(this HttpClient client, string url,
-        HttpMethod method, object? query = null, object? body = null, TimeSpan timeout = default,
-        IEnumerable<(string key, string value)>? headers = null, JsonSerializerOptions? jsonSerializerOptions = null)
+        HttpMethod method, object? query = null, object? body = null, TimeSpan timeout = default, bool logErrors = true,
+        IEnumerable<(string key, string value)>? headers = null,
+        JsonSerializerOptions? jsonSerializerOptions = null)
     {
         return InvokeOperations.InvokeOperationAsync(() =>
         {
-            return client.SendRequestAsync<T>(url, method, query, body, timeout, headers, jsonSerializerOptions);
+            return client.SendRequestAsync<T>(url, method, query, body, timeout, logErrors, headers,
+                jsonSerializerOptions);
         });
     }
 
     public static async Task<T> SendRequestAsync<T>(this HttpClient client, string url, HttpMethod method,
-        object? query = null, object? body = null, TimeSpan timeout = default,
-        IEnumerable<(string key, string value)>? headers = null, JsonSerializerOptions? jsonSerializerOptions = null)
+        object? query = null, object? body = null, TimeSpan timeout = default, bool logErrors = true,
+        IEnumerable<(string key, string value)>? headers = null,
+        JsonSerializerOptions? jsonSerializerOptions = null, bool throwErrorsFromContent = true)
     {
-        var content = await client.SendRequestAsync(url, method, ObjectToParametersList(query), body, timeout, headers, jsonSerializerOptions);
+        var content = await client.SendRequestAsync(url, method, ObjectToParametersList(query), body, timeout,
+            logErrors, headers, jsonSerializerOptions, throwErrorsFromContent);
         return await content.ReadAsJsonAsync<T>();
     }
 
     public static Task<HttpContent> SendRequestAsync(this HttpClient client, string url, HttpMethod method,
-        object? query = null, object? body = null, TimeSpan timeout = default,
-        IEnumerable<(string key, string value)>? headers = null, JsonSerializerOptions? jsonSerializerOptions = null)
+        object? query = null, object? body = null, TimeSpan timeout = default, bool logErrors = true,
+        IEnumerable<(string key, string value)>? headers = null,
+        JsonSerializerOptions? jsonSerializerOptions = null, bool throwErrorsFromContent = true)
     {
-        return client.SendRequestAsync(url, method, ObjectToParametersList(query), body, timeout, headers, jsonSerializerOptions);
+        return client.SendRequestAsync(url, method, ObjectToParametersList(query), body, timeout, logErrors,
+            headers, jsonSerializerOptions, throwErrorsFromContent);
     }
 
     public static async Task<T> SendRequestAsync<T>(this HttpClient client, string url, HttpMethod method,
         IEnumerable<(string key, object? value)> query, object? body = null, TimeSpan timeout = default,
-        IEnumerable<(string key, string value)>? headers = null, JsonSerializerOptions? jsonSerializerOptions = null)
+        IEnumerable<(string key, string value)>? headers = null,
+        JsonSerializerOptions? jsonSerializerOptions = null, bool throwErrorsFromContent = true)
     {
-        var content = await client.SendRequestAsync(url, method, query, body, timeout, headers, jsonSerializerOptions);
+        var content = await client.SendRequestAsync(url, method, query, body, timeout, headers: headers,
+            jsonSerializerOptions: jsonSerializerOptions, throwErrorsFromContent: throwErrorsFromContent);
         return await content.ReadAsJsonAsync<T>();
     }
 
     public static async Task<HttpContent> SendRequestAsync(this HttpClient client, string url, HttpMethod method,
         IEnumerable<(string key, object? value)>? query, object? body = null, TimeSpan timeout = default,
-        IEnumerable<(string key, string value)>? headers = null, JsonSerializerOptions? jsonSerializerOptions = null)
+        bool logErrors = true, IEnumerable<(string key, string value)>? headers = null,
+        JsonSerializerOptions? jsonSerializerOptions = null, bool throwErrorsFromContent = true)
     {
-        var response = await client.SendRequestWithRawResponseAsync(url, method, query, body, timeout, headers, jsonSerializerOptions);
-        
-        response.EnsureSuccessStatusCode();
-        return response.Content;
+        var response = await client.SendRequestWithRawResponseAsync(url, method, query, body, timeout, logErrors,
+            headers, jsonSerializerOptions);
+        try
+        {
+            if (throwErrorsFromContent)
+            {
+                if (!response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    throw new Exception(!string.IsNullOrEmpty(content)
+                        ? content
+                        : $"Status code {response.StatusCode}");
+                }
+            }
+
+            response.EnsureSuccessStatusCode();
+            return response.Content;
+        }
+        catch (Exception e)
+        {
+            if (logErrors)
+                logger.Trace($"HTTP request error: {method} {url} {response.StatusCode}\nException: {e}");
+            throw;
+        }
     }
-    
-    public static Task<HttpResponseMessage> SendRequestWithRawResponseAsync(this HttpClient client, string url, 
-        HttpMethod method, object? query = null, object? body = null, TimeSpan timeout = default, 
-        IEnumerable<(string key, string value)>? headers = null)
+
+    public static Task<HttpResponseMessage> SendRequestWithRawResponseAsync(this HttpClient client, string url,
+        HttpMethod method, object? query = null, object? body = null, TimeSpan timeout = default,
+        bool logErrors = true, IEnumerable<(string key, string value)>? headers = null,
+        JsonSerializerOptions? jsonSerializerOptions = null)
     {
-        return client.SendRequestWithRawResponseAsync(url, method, ObjectToParametersList(query), body, timeout, headers);
+        return client.SendRequestWithRawResponseAsync(url, method, ObjectToParametersList(query), body, timeout,
+            logErrors, headers, jsonSerializerOptions);
     }
 
     public static async Task<HttpResponseMessage> SendRequestWithRawResponseAsync(this HttpClient client, string url,
         HttpMethod method, IEnumerable<(string key, object? value)>? query, object? body = null,
-        TimeSpan timeout = default, IEnumerable<(string key, string value)>? headers = null,
+        TimeSpan timeout = default, bool logErrors = true, IEnumerable<(string key, string value)>? headers = null,
         JsonSerializerOptions? jsonSerializerOptions = null)
     {
         url = Regex.Replace(url, @"(?<!:)/+", @"/");
@@ -119,7 +155,17 @@ public static class HttpHelper
             timeout = TimeSpan.FromSeconds(100);
 
         var cts = new CancellationTokenSource(timeout);
-        return await client.SendAsync(httpRequest, cts.Token).ConfigureAwait(false);
+
+        try
+        {
+            return await client.SendAsync(httpRequest, cts.Token).ConfigureAwait(false);
+        }
+        catch (Exception e)
+        {
+            if (logErrors)
+                logger.Trace($"HTTP request error: {method} {url}\nException: {e}");
+            throw;
+        }
     }
 
     public static string GenerateUrlWithParams(string url, IEnumerable<(string key, object? value)> parameters)
@@ -136,23 +182,39 @@ public static class HttpHelper
         return $"{url}?{queryStr}";
     }
 
-    private static IEnumerable<(string key, object? value)>? ObjectToParametersList(object? obj)
+    private static IEnumerable<(string key, object? value)>? ObjectToParametersList(object? obj, bool arrayCommaSeparated = false)
     {
-        return obj?.GetType().GetProperties().SelectMany(x =>
-        {
-            var value = x.GetValue(obj, null);
+        var properties = obj?.GetType().GetProperties();
 
-            if (value is not string &&
-                value is IEnumerable array)
+        return arrayCommaSeparated
+            ? properties?.Select(x =>
             {
-                return array.Cast<object?>().Select(t => (x.Name, t));
-            }
+                var value = x.GetValue(obj, null);
 
-            return new[] {(x.Name, x.GetValue(obj, null))};
-        });
+                if (value is not string &&
+                    value is IEnumerable array)
+                {
+                    return (x.Name, string.Join(",", array.Cast<object?>()));
+                }
+
+                return (x.Name, value);
+            })
+            : properties?.SelectMany(x =>
+            {
+                var value = x.GetValue(obj, null);
+
+                if (value is not string &&
+                    value is IEnumerable array)
+                {
+                    return array.Cast<object?>().Select(t => (x.Name, t));
+                }
+
+                return new[] {(x.Name, x.GetValue(obj, null))};
+            });
     }
 
-    public static async ValueTask<T> ReadAsJsonAsync<T>(this HttpContent content, JsonSerializerOptions? jsonSerializerOptions = null)
+    public static async ValueTask<T> ReadAsJsonAsync<T>(this HttpContent content,
+        JsonSerializerOptions? jsonSerializerOptions = null)
     {
         await using var stream = await content.ReadAsStreamAsync();
         return await JsonSerializer.DeserializeAsync<T>(stream, jsonSerializerOptions ?? PlatformJsonSerialization.Options) ??

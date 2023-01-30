@@ -3,6 +3,7 @@ using MegaDTelegramRemoteControl.Models;
 using MegaDTelegramRemoteControl.Models.Device;
 using MegaDTelegramRemoteControl.Models.Device.Enums;
 using MegaDTelegramRemoteControl.Services.Interfaces;
+using MegaDTelegramRemoteControl.Services.MegaDServices.StatusParsers;
 using System;
 using System.Collections.Generic;
 using DevicePort = MegaDTelegramRemoteControl.Models.Device.DevicePort;
@@ -11,40 +12,12 @@ namespace MegaDTelegramRemoteControl.Services.MegaDServices;
 
 public class MegaDCommandParser : IDeviceCommandParser
 {
-    #region Port status parsers
-
-    private interface IStatusParser
-    {
-        DevicePortStatus Parse(DevicePort devicePort, string portStatus);
-    }
-
-    private class SwStatusParser : IStatusParser
-    {
-        public DevicePortStatus Parse(DevicePort devicePort, string portStatus)
-        {
-            return new()
-                   {
-                       SWStatus = Enum.Parse<SWStatus>(portStatus, true),
-                       Port = devicePort,
-                   };
-        }
-    }
-
-    #endregion
-
-    #region Fields
-
-    private readonly HomeConfig homeConfig;
-
+    private readonly IHomeService homeService;
     private static readonly Dictionary<DeviceOutPortMode, IStatusParser> parsers;
 
-    #endregion
-
-    #region Ctors
-
-    public MegaDCommandParser(HomeConfig homeConfig)
+    public MegaDCommandParser(IHomeService homeService)
     {
-        this.homeConfig = homeConfig;
+        this.homeService = homeService;
     }
 
     static MegaDCommandParser()
@@ -55,15 +28,13 @@ public class MegaDCommandParser : IDeviceCommandParser
                   };
     }
 
-    #endregion
-
     #region Events
 
     public DeviceEvent ParseEvent(string deviceId, IReadOnlyCollection<NewEventData> eventData)
     {
         var result = new DeviceEvent(eventData);
 
-        if (!homeConfig.Devices.TryGetValue(deviceId, out var device))
+        if (!homeService.Devices.TryGetValue(deviceId, out var device))
             return result;
 
         result.Device = device;

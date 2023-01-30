@@ -1,14 +1,13 @@
-﻿namespace MegaDTelegramRemoteControl.Models.Device.Enums
+﻿namespace MegaDTelegramRemoteControl.Models.Device.Enums;
+
+public enum DeviceEventType
 {
-    public enum DeviceEventType
-    {
-        [DeviceEvent("")]
-        Unknown,
-        
-        [DeviceEvent("st")]
-        DeviceStarted,
-        
-        [DeviceEvent("pt")]
-        PortEvent,
-    }
+    [DeviceEvent("")]
+    Unknown,
+
+    [DeviceEvent("st")]
+    DeviceStarted,
+
+    [DeviceEvent("pt")]
+    PortEvent,
 }

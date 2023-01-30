@@ -5,20 +5,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MegaDTelegramRemoteControl.Infrastructure.Configurations
-{
-    public static class Constants
-    {
-        static Constants()
-        {
-            InstanceId = Guid.NewGuid();
-            DeviceEventTypes = Extensions
-                               .GetEnumList<DeviceEventType>()
-                               .ToDictionary(x => x.GetAttribute<DeviceEventAttribute>().Command, x => x);
-        }
-        
-        public static readonly Guid InstanceId;
+namespace MegaDTelegramRemoteControl.Infrastructure.Configurations;
 
-        public static readonly Dictionary<string, DeviceEventType> DeviceEventTypes;
+public static class Constants
+{
+    static Constants()
+    {
+        InstanceId = Guid.NewGuid();
+        DeviceEventTypes = Extensions.GetEnumList<DeviceEventType>()
+                                     .ToDictionary(x => x.GetAttribute<DeviceEventAttribute>().Command, x => x);
     }
+
+    public static readonly Guid InstanceId;
+
+    public static readonly Dictionary<string, DeviceEventType> DeviceEventTypes;
 }

@@ -6,36 +6,35 @@ using System;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
-namespace MegaDTelegramRemoteControl.Services.StubServices
+namespace MegaDTelegramRemoteControl.Services.StubServices;
+
+public class StubDeviceConnector : IDeviceConnector
 {
-    public class StubDeviceConnector : IDeviceConnector
+    private readonly IDeviceCommandParser deviceDataParser;
+
+    public StubDeviceConnector(IDeviceCommandParser deviceDataParser)
     {
-        private readonly IDeviceCommandParser deviceDataParser;
+        this.deviceDataParser = deviceDataParser;
+    }
 
-        public StubDeviceConnector(IDeviceCommandParser deviceDataParser)
+    public Task<OperationResult<DevicePortStatus>> GetPortStatusAsync(DevicePort port, bool useCache = false)
+    {
+        return Task.FromResult(InvokeOperations.InvokeOperation(() =>
         {
-            this.deviceDataParser = deviceDataParser;
-        }
+            var bytes = new byte[8];
 
-        public Task<OperationResult<DevicePortStatus>> GetPortStatusAsync(DevicePort port, bool useCache = false)
-        {
-            return Task.FromResult(InvokeOperations.InvokeOperation(() =>
-            {
-                var bytes = new byte[8];
+            using var generator = RandomNumberGenerator.Create();
+            generator.GetBytes(bytes);
 
-                using var generator = RandomNumberGenerator.Create();
-                generator.GetBytes(bytes);
+            var rand = BitConverter.ToInt64(bytes, 0);
+            var data = rand % 2 == 0 ? SWStatus.On : SWStatus.Off;
 
-                var rand = BitConverter.ToInt64(bytes, 0);
-                var data = rand % 2 == 0 ? SWStatus.On : SWStatus.Off;
+            return deviceDataParser.ParseStatus(port, data.ToString());
+        }));
+    }
 
-                return deviceDataParser.ParseStatus(port, data.ToString());
-            }));
-        }
-        
-        public Task<OperationResult> InvokePortActionAsync(DevicePort port, DevicePortAction action)
-        {
-            return Task.FromResult(OperationResult.Ok());
-        }
+    public Task<OperationResult> InvokePortActionAsync(DevicePort port, DevicePortAction action)
+    {
+        return Task.FromResult(OperationResult.Ok());
     }
 }

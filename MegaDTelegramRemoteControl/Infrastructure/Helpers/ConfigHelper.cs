@@ -17,9 +17,8 @@ public static class ConfigHelper
 {
     private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-    public static HomeConfig MakeConfig(DevicesConfig devicesConfig,
-        HomeMapConfig homeMapConfig,
-        AutomationConfig automationConfig)
+    public static HomeConfig MakeConfig(DevicesConfig devicesConfig, HomeMapConfig homeMapConfig,
+        AutomationConfig automationConfig, KeeneticProxyConfig keeneticProxyConfig)
     {
         var devices = GetDevices(devicesConfig, automationConfig);
         var locations = GetLocations(homeMapConfig, devices);

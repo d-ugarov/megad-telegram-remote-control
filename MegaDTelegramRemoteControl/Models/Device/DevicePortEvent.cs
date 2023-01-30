@@ -10,9 +10,9 @@ public class DevicePortEvent
     private DevicePortInEvent? inPortData;
     private DevicePortOutEvent? outPortData;
 
-    public DevicePort Port { get; init; } = null!;
+    public required DevicePort Port { get; init; }
 
-    public DateTime Date { get; init; }
+    public required DateTime Date { get; init; }
 
     public DevicePortInEvent? In
     {

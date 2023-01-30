@@ -3,6 +3,7 @@ using MegaDTelegramRemoteControl.Infrastructure.Models;
 using MegaDTelegramRemoteControl.Models.Device;
 using MegaDTelegramRemoteControl.Services.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using System;
 using System.Net.Http;
 using System.Threading;
@@ -21,12 +22,12 @@ public class MegaDConnector : IDeviceConnector
 
     public MegaDConnector(HttpClient httpClient,
         IDeviceCommandParser deviceCommandParser,
-        PlatformConfig platformConfig,
+        IOptions<PlatformConfig> platformConfig,
         IMemoryCache memoryCache)
     {
         this.httpClient = httpClient;
         this.deviceCommandParser = deviceCommandParser;
-        this.platformConfig = platformConfig;
+        this.platformConfig = platformConfig.Value;
         this.memoryCache = memoryCache;
     }
 
