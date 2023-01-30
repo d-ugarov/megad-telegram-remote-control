@@ -13,7 +13,9 @@ namespace MegaDTelegramRemoteControl.Services.MegaDServices;
 public class MegaDCommandParser : IDeviceCommandParser
 {
     private readonly IHomeService homeService;
-    private static readonly Dictionary<DeviceOutPortMode, IStatusParser> parsers;
+
+    private static readonly Dictionary<DeviceOutPortMode, IStatusParser> parsersOutPorts;
+    private static readonly IStatusParser parserInPorts;
 
     public MegaDCommandParser(IHomeService homeService)
     {
@@ -22,10 +24,11 @@ public class MegaDCommandParser : IDeviceCommandParser
 
     static MegaDCommandParser()
     {
-        parsers = new Dictionary<DeviceOutPortMode, IStatusParser>
-                  {
-                      {DeviceOutPortMode.SW, new SwStatusParser()}
-                  };
+        parsersOutPorts = new()
+                          {
+                              {DeviceOutPortMode.SW, new OutSwStatusParser()}
+                          };
+        parserInPorts = new InStatusParser();
     }
 
     #region Events
@@ -191,8 +194,12 @@ public class MegaDCommandParser : IDeviceCommandParser
 
     public DevicePortStatus ParseStatus(DevicePort port, string portStatus)
     {
-        if (!parsers.TryGetValue(port.OutMode ?? default, out var parser))
-            throw new Exception($"Port type {port.OutMode} not supported");
+        var parser = port.Type switch
+        {
+            DevicePortType.IN => parserInPorts,
+            DevicePortType.OUT when parsersOutPorts.TryGetValue(port.OutMode!.Value, out var outParser) => outParser,
+            _ => throw new Exception($"Port type {port.OutMode} not supported")
+        };
 
         return parser.Parse(port, portStatus);
     }

@@ -6,20 +6,34 @@ namespace MegaDTelegramRemoteControl.Models.Device;
 public class DevicePortStatus
 {
     public required DevicePort Port { get; init; }
-    public required SWStatus SWStatus { get; init; }
+    public InOutSWStatus InOutSwStatus { get; init; }
+    public int InCounter { get; init; }
 
     public override string ToString()
     {
-        switch (Port.OutMode)
+        switch (Port.Type)
         {
-            case DeviceOutPortMode.SW:
+            case DevicePortType.IN:
             {
-                return Port.OutModeIcons.TryGetValue(SWStatus.ToString(), out var icon)
+                return Port.InOutSWModeIcons.TryGetValue(InOutSwStatus.ToString(), out var icon)
                     ? icon
-                    : $"[{SWStatus}]";
+                    : $"[{InOutSwStatus}]";
+            }
+            case DevicePortType.OUT:
+            {
+                switch (Port.OutMode)
+                {
+                    case DeviceOutPortMode.SW:
+                    {
+                        return Port.InOutSWModeIcons.TryGetValue(InOutSwStatus.ToString(), out var icon)
+                            ? icon
+                            : $"[{InOutSwStatus}]";
+                    }
+                }
+                break;
             }
         }
 
-        return "";
+        return string.Empty;
     }
 }

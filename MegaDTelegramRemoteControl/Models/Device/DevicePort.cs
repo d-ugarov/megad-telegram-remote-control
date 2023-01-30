@@ -21,7 +21,7 @@ public record DevicePort
         init => outMode = value;
     }
 
-    public required Dictionary<string, string> OutModeIcons { get; init; }
+    public required Dictionary<string, string> InOutSWModeIcons { get; init; }
 
     public required Device Device { get; init; }
 

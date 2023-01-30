@@ -82,14 +82,14 @@ public class HomeTriggerProcessor : IHomeTriggerProcessor
         if (additionalConditions == null)
             return true;
         
-        var statuses = new List<SWStatus>();
+        var statuses = new List<InOutSWStatus>();
 
         foreach (var conditionsPort in additionalConditions.Ports)
         {
             var state = await deviceConnector.GetPortStatusAsync(conditionsPort, true);
             if (state.IsSuccess)
             {
-                statuses.Add(state.Data!.SWStatus);
+                statuses.Add(state.Data!.InOutSwStatus);
             }
         }
 

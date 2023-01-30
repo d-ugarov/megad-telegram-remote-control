@@ -32,7 +32,7 @@ public record TriggerRuleAdditionalConditions
 {
     public TriggerRulePort[] Ports { get; set; } = Array.Empty<TriggerRulePort>();
     public ConditionType Type { get; set; }
-    public SWStatus? Status { get; set; }
+    public InOutSWStatus? Status { get; set; }
 }
 
 public enum ConditionType
@@ -53,7 +53,6 @@ public record TriggerRuleDestinationPortState
 
 public record TriggerRuleSourcePortStatus
 {
-    public SWStatus[] SWStatuses { get; init; } = Array.Empty<SWStatus>();
     public DeviceInPortCommand[] InPortCommands { get; init; } = Array.Empty<DeviceInPortCommand>();
 }
 

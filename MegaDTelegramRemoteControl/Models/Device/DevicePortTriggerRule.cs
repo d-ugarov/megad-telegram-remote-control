@@ -26,5 +26,5 @@ public record AdditionalConditions
 {
     public List<DevicePort> Ports { get; } = new();
     public required ConditionType Type { get; init; }
-    public required SWStatus? Status { get; set; }
+    public required InOutSWStatus? Status { get; set; }
 }

@@ -27,7 +27,7 @@ public class StubDeviceConnector : IDeviceConnector
             generator.GetBytes(bytes);
 
             var rand = BitConverter.ToInt64(bytes, 0);
-            var data = rand % 2 == 0 ? SWStatus.On : SWStatus.Off;
+            var data = rand % 2 == 0 ? InOutSWStatus.On : InOutSWStatus.Off;
 
             return deviceDataParser.ParseStatus(port, data.ToString());
         }));
