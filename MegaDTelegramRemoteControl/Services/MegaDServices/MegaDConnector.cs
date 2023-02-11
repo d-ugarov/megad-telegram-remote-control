@@ -5,6 +5,7 @@ using MegaDTelegramRemoteControl.Services.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -53,6 +54,28 @@ public class MegaDConnector : IDeviceConnector
             }
 
             return deviceCommandParser.ParseStatus(port, data);
+        });
+    }
+
+    public Task<OperationResult<List<DevicePortStatus>>> GetPortStatusesAsync(Device device)
+    {
+        return InvokeOperations.InvokeOperationAsync(async () =>
+        {
+            var url = GetUrl(device, "?cmd=all");
+            var data = await SendRequestAsync(url);
+            var result = new List<DevicePortStatus>();
+
+            var statuses = data.Split(';');
+
+            for (var i = 0; i < statuses.Length; i++)
+            {
+                if (!device.Ports.TryGetValue(i.ToString(), out var port))
+                    continue;
+
+                result.Add(deviceCommandParser.ParseStatus(port, statuses[i]));
+            }
+
+            return result;
         });
     }
 
