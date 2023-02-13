@@ -30,7 +30,9 @@ public class TelegramBotHandler : IBotHandler
         if (string.IsNullOrEmpty(actionId))
             return GetDefaultMenu();
 
-        return await ProcessActionInternalAsync(homeService.Locations, actionId) ?? GetDefaultMenu();
+        return await ProcessActionInternalAsync(homeService.Locations, actionId) ??
+               await ProcessActionConditionInternalAsync(homeService.Locations, actionId) ??
+               GetDefaultMenu();
     }
 
     private BotMenu GetDefaultMenu()
@@ -43,7 +45,7 @@ public class TelegramBotHandler : IBotHandler
                          Buttons = homeService.Locations
                                              .Select(x => new ButtonItem
                                                           {
-                                                              Id = x.Id,
+                                                              ActionId = x.Id,
                                                               Name = x.Name,
                                                           })
                                              .ToList(),
@@ -64,7 +66,7 @@ public class TelegramBotHandler : IBotHandler
             foreach (var item in location.Items)
             {
                 // action by item id
-                if (item.Id == id)
+                if (item.ActionId == id)
                 {
                     logger.LogTrace($"[BotHandler] Call: {location.Name} -> {item.Port.Name}");
 
@@ -75,6 +77,34 @@ public class TelegramBotHandler : IBotHandler
             }
 
             var subLocationPage = await ProcessActionInternalAsync(location.SubLocations, id);
+            if (subLocationPage != null)
+                return subLocationPage;
+        }
+
+        return null;
+    }
+
+    private async Task<BotMenu?> ProcessActionConditionInternalAsync(IEnumerable<Location> locations, string id)
+    {
+        foreach (var location in locations)
+        {
+            foreach (var condition in location.ItemsConditions)
+            {
+                foreach (var item in condition.Items)
+                {
+                    // action by item id
+                    if (item.ActionId == id)
+                    {
+                        logger.LogTrace($"[BotHandler] Call: {location.Name} -> {item.Port.Name}");
+
+                        await deviceConnector.InvokePortActionAsync(item.Port, DevicePortAction.CommandSWDefault);
+
+                        return await CreateLocationPageAsync(location);
+                    }
+                }
+            }
+
+            var subLocationPage = await ProcessActionConditionInternalAsync(location.SubLocations, id);
             if (subLocationPage != null)
                 return subLocationPage;
         }
@@ -95,7 +125,7 @@ public class TelegramBotHandler : IBotHandler
         {
             result.Buttons.Add(new ButtonItem
                                {
-                                   Id = subLocation.Id,
+                                   ActionId = subLocation.Id,
                                    Name = subLocation.Name,
                                });
         }
@@ -106,15 +136,34 @@ public class TelegramBotHandler : IBotHandler
         {
             var status = await GetPortStatusAsync(devicesStatuses, item.Port);
 
-            var button = new ButtonItem
-                         {
-                             Id = item.Id,
-                             Name = status != null
-                                 ? $"{status} {item.FormattedName}"
-                                 : $"{item.FormattedName}",
-                         };
+            result.Buttons.Add(new ButtonItem
+                               {
+                                   ActionId = item.ActionId,
+                                   Name = status != null
+                                       ? $"{status} {item.FormattedName}"
+                                       : $"{item.FormattedName}",
+                               });
+        }
 
-            result.Buttons.Add(button);
+        foreach (var condition in location.ItemsConditions)
+        {
+            foreach (var item in condition.Items)
+            {
+                var status = await GetPortStatusAsync(devicesStatuses, item.Port);
+
+                switch (condition.Type)
+                {
+                    case LocationConditionType.PortOutCurrentStatus when status?.InOutSwStatus == condition.Status:
+                    {
+                        result.Buttons.Add(new ButtonItem
+                                           {
+                                               ActionId = item.ActionId,
+                                               Name = $"{status} {item.FormattedName}",
+                                           });
+                        break;
+                    }
+                }
+            }
         }
 
         AppendNavigationButtons(location, result);
@@ -144,7 +193,7 @@ public class TelegramBotHandler : IBotHandler
         {
             menu.Buttons.Add(new ButtonItem
                              {
-                                 Id = location.Parent.Id,
+                                 ActionId = location.Parent.Id,
                                  Name = "« Back",
                                  Order = int.MaxValue,
                              });
@@ -152,7 +201,7 @@ public class TelegramBotHandler : IBotHandler
 
         menu.Buttons.Add(new ButtonItem
                          {
-                             Id = Guid.NewGuid().ToString(),
+                             ActionId = Guid.NewGuid().ToString(),
                              Name = "Dashboard",
                              Order = int.MaxValue,
                          });

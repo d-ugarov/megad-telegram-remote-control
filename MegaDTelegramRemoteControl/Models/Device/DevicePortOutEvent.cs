@@ -3,7 +3,7 @@ using MegaDTelegramRemoteControl.Models.Device.Enums;
 
 namespace MegaDTelegramRemoteControl.Models.Device;
 
-public class DevicePortOutEvent
+public record DevicePortOutEvent
 {
     public required DeviceOutPortCommand Command { get; set; }
 

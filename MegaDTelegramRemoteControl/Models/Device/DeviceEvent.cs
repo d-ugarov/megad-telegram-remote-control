@@ -6,7 +6,7 @@ using System.Text;
 
 namespace MegaDTelegramRemoteControl.Models.Device;
 
-public class DeviceEvent
+public record DeviceEvent(IReadOnlyCollection<NewEventData> EventData)
 {
     private DevicePortEvent? port;
 
@@ -22,13 +22,6 @@ public class DeviceEvent
             ? port
             : throw new OperationException($"Port is not available for event type {Type}");
         set => port = value;
-    }
-
-    public IReadOnlyCollection<NewEventData> EventData { get; }
-
-    public DeviceEvent(IReadOnlyCollection<NewEventData> eventData)
-    {
-        EventData = eventData;
     }
 
     public override string ToString()

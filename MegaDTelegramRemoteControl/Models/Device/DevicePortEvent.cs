@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MegaDTelegramRemoteControl.Models.Device;
 
-public class DevicePortEvent
+public record DevicePortEvent
 {
     private DevicePortInEvent? inPortData;
     private DevicePortOutEvent? outPortData;

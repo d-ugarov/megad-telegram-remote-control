@@ -10,6 +10,7 @@ using Device = MegaDTelegramRemoteControl.Models.Device.Device;
 using DevicePort = MegaDTelegramRemoteControl.Models.Device.DevicePort;
 using Location = MegaDTelegramRemoteControl.Models.Device.Location;
 using LocationItems = MegaDTelegramRemoteControl.Models.Device.LocationItems;
+using LocationCondition = MegaDTelegramRemoteControl.Models.Device.LocationCondition;
 
 namespace MegaDTelegramRemoteControl.Infrastructure.Helpers;
 
@@ -167,11 +168,44 @@ public static class ConfigHelper
 
             locationModel.Items.Add(new LocationItems
                                     {
-                                        Id = GetItemId(parent?.Id, port.Name, itemIds),
+                                        ActionId = GetItemId(parent?.Id, port.Name, itemIds),
                                         Device = device,
                                         Port = port,
                                         CustomName = locationItem.CustomName,
                                     });
+        }
+
+        foreach (var locationItem in location.ItemsConditions)
+        {
+            var locationCondition = new LocationCondition
+                                    {
+                                        Status = locationItem.Status,
+                                        Type = locationItem.Type,
+                                    };
+
+            switch (locationItem.Type)
+            {
+                case LocationConditionType.PortOutCurrentStatus when locationItem.Status.HasValue:
+                {
+                    foreach (var device in devices.Values)
+                    {
+                        foreach (var (_, port) in device.Ports.Where(x => x.Value.Type == DevicePortType.OUT))
+                        {
+                            locationCondition.Items.Add(new LocationItems
+                                                        {
+                                                            ActionId = GetItemId(parent?.Id, port.Name, itemIds),
+                                                            Device = device,
+                                                            Port = port,
+                                                        });
+                        }
+                    }
+
+                    break;
+                }
+            }
+
+            if (locationCondition.Items.Any())
+                locationModel.ItemsConditions.Add(locationCondition);
         }
 
         foreach (var subLocation in location.SubLocations)

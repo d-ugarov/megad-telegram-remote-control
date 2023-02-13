@@ -138,7 +138,7 @@ public class TelegramBotService : IBotService
                                                                Order = k,
                                                                Row = v.Select(x =>
                                                                    InlineKeyboardButton.WithCallbackData(x.Name,
-                                                                       x.Id))
+                                                                       x.ActionId))
                                                            })
                           .OrderBy(x => x.Order)
                           .Select(x => x.Row)
@@ -147,7 +147,7 @@ public class TelegramBotService : IBotService
         var buttons1 = menu.Buttons
                            .OrderBy(x => x.Order)
                            .Select(x => new List<InlineKeyboardButton>
-                                        {InlineKeyboardButton.WithCallbackData(x.Name, x.Id)})
+                                        {InlineKeyboardButton.WithCallbackData(x.Name, x.ActionId)})
                            .ToList();
 
         var inlineKeyboard = new InlineKeyboardMarkup(buttons1);

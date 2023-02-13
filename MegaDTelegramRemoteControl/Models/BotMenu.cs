@@ -10,7 +10,7 @@ public record BotMenu
 
 public record ButtonItem
 {
-    public required string Name { get; set; }
-    public required string Id { get; init; }
+    public required string Name { get; init; }
+    public required string ActionId { get; init; }
     public int Order { get; init; }
 }
