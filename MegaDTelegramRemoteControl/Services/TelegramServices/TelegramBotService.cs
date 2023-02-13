@@ -132,25 +132,35 @@ public class TelegramBotService : IBotService
 
     private static (string text, InlineKeyboardMarkup inlineKeyboard) GetFormattedAnswer(BotMenu menu)
     {
+        // var buttons = menu.Buttons
+        //                   .GroupBy(x => x.Order, (k, v) => new
+        //                                                    {
+        //                                                        Order = k,
+        //                                                        Row = v.Select(x =>
+        //                                                            InlineKeyboardButton.WithCallbackData(x.Name,
+        //                                                                x.ActionId))
+        //                                                    })
+        //                   .OrderBy(x => x.Order)
+        //                   .Select(x => x.Row)
+        //                   .ToList();
+
         var buttons = menu.Buttons
-                          .GroupBy(x => x.Order, (k, v) => new
-                                                           {
-                                                               Order = k,
-                                                               Row = v.Select(x =>
-                                                                   InlineKeyboardButton.WithCallbackData(x.Name,
-                                                                       x.ActionId))
-                                                           })
                           .OrderBy(x => x.Order)
-                          .Select(x => x.Row)
+                          .Select(x => new List<InlineKeyboardButton>
+                                       {
+                                           InlineKeyboardButton.WithCallbackData(x.Name, x.ActionId)
+                                       })
                           .ToList();
 
-        var buttons1 = menu.Buttons
-                           .OrderBy(x => x.Order)
-                           .Select(x => new List<InlineKeyboardButton>
-                                        {InlineKeyboardButton.WithCallbackData(x.Name, x.ActionId)})
-                           .ToList();
+        if (menu.FooterButtons.Any())
+        {
+            buttons.Add(menu.FooterButtons
+                            .OrderBy(x => x.Order)
+                            .Select(x => InlineKeyboardButton.WithCallbackData(x.Name, x.ActionId))
+                            .ToList());
+        }
 
-        var inlineKeyboard = new InlineKeyboardMarkup(buttons1);
+        var inlineKeyboard = new InlineKeyboardMarkup(buttons);
 
         return (menu.Text, inlineKeyboard);
     }

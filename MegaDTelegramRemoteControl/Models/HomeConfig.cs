@@ -32,6 +32,24 @@ public class HomeConfig
                 }
             }
 
+            if (tempLocation.ItemsConditions.Any())
+            {
+                log.AppendLine($"{Extensions.GetWhitespaces(offset + 3)}" +
+                               $"Items conditions:");
+
+                foreach (var condition in tempLocation.ItemsConditions)
+                {
+                    log.AppendLine($"{Extensions.GetWhitespaces(offset + 4)}" +
+                                   $"{condition.Type} {condition.Status}:");
+                    
+                    foreach (var item in condition.Items)
+                    {
+                        log.AppendLine($"{Extensions.GetWhitespaces(offset + 5)}" +
+                                       $"[{item.CustomName ?? item.Port.Name}] Device {item.Device.Name}, Port {item.Port.Id}");
+                    }
+                }
+            }
+
             if (tempLocation.SubLocations.Any())
             {
                 log.AppendLine($"{Extensions.GetWhitespaces(offset + 3)}" +

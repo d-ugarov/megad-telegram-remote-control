@@ -6,6 +6,7 @@ public record BotMenu
 {
     public required string Text { get; init; }
     public List<ButtonItem> Buttons { get; init; } = new();
+    public List<ButtonItem> FooterButtons { get; init; } = new();
 }
 
 public record ButtonItem

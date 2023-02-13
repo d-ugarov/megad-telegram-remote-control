@@ -34,7 +34,7 @@ public record DevicePortEvent
     {
         var str = new StringBuilder();
 
-        str.Append($"port: {Port.Description ?? Port.Name} ({Port.Type})");
+        str.Append($"port: {Port.Name} ({Port.Type})");
 
         if (inPortData != null)
             str.Append($", {inPortData}");

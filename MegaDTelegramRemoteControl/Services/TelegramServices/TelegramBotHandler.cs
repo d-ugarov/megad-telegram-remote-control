@@ -126,7 +126,7 @@ public class TelegramBotHandler : IBotHandler
             result.Buttons.Add(new ButtonItem
                                {
                                    ActionId = subLocation.Id,
-                                   Name = subLocation.Name,
+                                   Name = $"{subLocation.Name} ▶",
                                });
         }
 
@@ -191,19 +191,19 @@ public class TelegramBotHandler : IBotHandler
     {
         if (location.Parent != null)
         {
-            menu.Buttons.Add(new ButtonItem
-                             {
-                                 ActionId = location.Parent.Id,
-                                 Name = "« Back",
-                                 Order = int.MaxValue,
-                             });
+            menu.FooterButtons.Add(new ButtonItem
+                                   {
+                                       ActionId = location.Parent.Id,
+                                       Name = "↩ Back",
+                                       Order = int.MaxValue,
+                                   });
         }
 
-        menu.Buttons.Add(new ButtonItem
-                         {
-                             ActionId = Guid.NewGuid().ToString(),
-                             Name = "Dashboard",
-                             Order = int.MaxValue,
-                         });
+        menu.FooterButtons.Add(new ButtonItem
+                               {
+                                   ActionId = Guid.NewGuid().ToString(),
+                                   Name = "🔼 Dashboard",
+                                   Order = int.MaxValue,
+                               });
     }
 }

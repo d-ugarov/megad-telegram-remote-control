@@ -52,7 +52,6 @@ public static class ConfigHelper
                                              {
                                                  Id = port.Id,
                                                  Name = port.Name,
-                                                 Description = port.Description,
                                                  Type = port.Type,
                                                  OutMode = port.OutMode,
                                                  InOutSWModeIcons = port.InOutSWModeIcons,

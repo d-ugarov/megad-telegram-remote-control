@@ -28,7 +28,6 @@ public record DevicePort
     public string Id { get; init; } = null!;
     public DevicePortType Type { get; init; }
     public string Name { get; init; } = null!;
-    public string? Description { get; init; }
     public DeviceOutPortMode? OutMode { get; init; }
     public Dictionary<string, string> InOutSWModeIcons { get; init; } = new();
 }

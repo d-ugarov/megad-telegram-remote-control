@@ -94,6 +94,7 @@ void ConfigureServices(WebApplicationBuilder builder)
 
     var homeConfig = CreateHomeConfig(builder);
     logger.Info(homeConfig.ToString());
+
     builder.Services.AddSingleton<IHomeService, HomeService>(x =>
         new HomeService(
             x.GetRequiredService<ILogger<HomeService>>(),
