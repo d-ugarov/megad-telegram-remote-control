@@ -2,8 +2,6 @@
 using MegaDTelegramRemoteControl.Infrastructure.Models;
 using MegaDTelegramRemoteControl.Models.Device;
 using MegaDTelegramRemoteControl.Services.Interfaces;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -17,47 +15,26 @@ namespace MegaDTelegramRemoteControl.Services.MegaDServices;
 public class MegaDConnector : IDeviceConnector
 {
     private readonly HttpClient httpClient;
-    private readonly PlatformConfig platformConfig;
-    private readonly IMemoryCache memoryCache;
     private readonly IDeviceCommandParser deviceCommandParser;
 
     public MegaDConnector(HttpClient httpClient,
-        IDeviceCommandParser deviceCommandParser,
-        IOptions<PlatformConfig> platformConfig,
-        IMemoryCache memoryCache)
+        IDeviceCommandParser deviceCommandParser)
     {
         this.httpClient = httpClient;
         this.deviceCommandParser = deviceCommandParser;
-        this.platformConfig = platformConfig.Value;
-        this.memoryCache = memoryCache;
     }
 
-    public Task<OperationResult<DevicePortStatus>> GetPortStatusAsync(DevicePort port, bool useCache = false)
+    public Task<OperationResult<DevicePortStatus>> GetPortStatusAsync(DevicePort port)
     {
         return InvokeOperations.InvokeOperationAsync(async () =>
         {
             var url = GetUrl(port.Device, $"?pt={port.Id}&cmd=get");
-            var cacheKey = GetCacheKey(url);
-            string data;
-
-            if (useCache &&
-                platformConfig.CachePortStatusesInSeconds > 0 &&
-                memoryCache.TryGetValue(cacheKey, out string? cachedData) &&
-                !string.IsNullOrEmpty(cachedData))
-            {
-                data = cachedData;
-            }
-            else
-            {
-                data = await SendRequestAsync(url);
-                memoryCache.Set(cacheKey, data, TimeSpan.FromSeconds(platformConfig.CachePortStatusesInSeconds));
-            }
-
+            var data = await SendRequestAsync(url);
             return deviceCommandParser.ParseStatus(port, data);
         });
     }
 
-    public Task<OperationResult<List<DevicePortStatus>>> GetPortStatusesAsync(Device device)
+    public Task<OperationResult<List<DevicePortStatus>>> GetDevicePortsStatusesAsync(Device device)
     {
         return InvokeOperations.InvokeOperationAsync(async () =>
         {
@@ -107,5 +84,4 @@ public class MegaDConnector : IDeviceConnector
     }
 
     private static string GetUrl(Device device, string query) => $"{device.Ip}/{device.Pwd}/{query}";
-    private static string GetCacheKey(string url) => $"Cache:Port:{url}";
 }

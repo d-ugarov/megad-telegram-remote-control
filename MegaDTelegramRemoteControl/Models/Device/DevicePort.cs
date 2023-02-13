@@ -1,12 +1,14 @@
 ﻿using MegaDTelegramRemoteControl.Infrastructure.Configurations;
 using MegaDTelegramRemoteControl.Infrastructure.Models;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MegaDTelegramRemoteControl.Models.Device;
 
 public record DevicePort
 {
     private readonly DeviceOutPortMode? outMode;
+    private List<Device>? triggersRequiredDevices;
 
     public required string Id { get; init; }
     public required DevicePortType Type { get; init; }
@@ -26,6 +28,22 @@ public record DevicePort
     public required Device Device { get; init; }
 
     public List<DevicePortTriggerRule> TriggerRules { get; } = new();
+
+    public List<Device> TriggerRulesRequiredDevices
+    {
+        get
+        {
+            if (triggersRequiredDevices != null)
+                return triggersRequiredDevices;
+
+            triggersRequiredDevices = TriggerRules.Where(x => x.AdditionalConditions != null)
+                                                  .SelectMany(x => x.AdditionalConditions!.Ports.Select(p => p.Device))
+                                                  .Union(TriggerRules.SelectMany(t => t.DestinationPortRules.Select(p => p.Port.Device)))
+                                                  .Distinct()
+                                                  .ToList();
+            return triggersRequiredDevices;
+        }
+    }
 
     public override string ToString() => $"port: {Description ?? Name} " +
                                          $"({Type},{(Type == DevicePortType.OUT ? $" {outMode}," : "")} {Device.Name})";

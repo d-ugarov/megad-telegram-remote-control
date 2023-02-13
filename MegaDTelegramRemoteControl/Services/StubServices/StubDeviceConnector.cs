@@ -19,12 +19,12 @@ public class StubDeviceConnector : IDeviceConnector
         this.deviceDataParser = deviceDataParser;
     }
 
-    public Task<OperationResult<DevicePortStatus>> GetPortStatusAsync(DevicePort port, bool useCache = false)
+    public Task<OperationResult<DevicePortStatus>> GetPortStatusAsync(DevicePort port)
     {
         return Task.FromResult(InvokeOperations.InvokeOperation(() => GetRandomPortStatus(port)));
     }
 
-    public Task<OperationResult<List<DevicePortStatus>>> GetPortStatusesAsync(Device device)
+    public Task<OperationResult<List<DevicePortStatus>>> GetDevicePortsStatusesAsync(Device device)
     {
         return Task.FromResult(InvokeOperations.InvokeOperation(() => device.Ports.Values.Select(GetRandomPortStatus).ToList()));
     }

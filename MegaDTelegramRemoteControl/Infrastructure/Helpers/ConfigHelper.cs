@@ -43,7 +43,7 @@ public static class ConfigHelper
 
         foreach (var device in devicesConfig.Devices)
         {
-            var deviceModel = new Device(device.Name, device.Ip, device.Pwd);
+            var deviceModel = new Device(device.Id, device.Name, device.Ip, device.Pwd);
 
             foreach (var port in device.DevicePorts)
             {
