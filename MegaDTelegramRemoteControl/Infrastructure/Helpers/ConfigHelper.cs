@@ -54,7 +54,7 @@ public static class ConfigHelper
                                                  Description = port.Description,
                                                  Type = port.Type,
                                                  OutMode = port.OutMode,
-                                                 InOutSWModeIcons = port.OutModeIcons,
+                                                 InOutSWModeIcons = port.InOutSWModeIcons,
                                                  Device = deviceModel,
                                              };
             }

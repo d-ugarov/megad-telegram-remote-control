@@ -1,5 +1,4 @@
-﻿using MegaDTelegramRemoteControl.Infrastructure.Configurations;
-using MegaDTelegramRemoteControl.Models;
+﻿using MegaDTelegramRemoteControl.Models;
 using MegaDTelegramRemoteControl.Models.Device;
 using MegaDTelegramRemoteControl.Services.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -36,7 +35,7 @@ public class TelegramBotHandler : IBotHandler
 
     private BotMenu GetDefaultMenu()
     {
-        logger.LogTrace($"[BotHandler] Return default menu");
+        logger.LogTrace("[BotHandler] Return default menu");
 
         var result = new BotMenu
                      {
@@ -101,24 +100,42 @@ public class TelegramBotHandler : IBotHandler
                                });
         }
 
-        foreach (var items in location.Items.Where(x => x.Port.Type == DevicePortType.OUT))
+        var devicesStatuses = new Dictionary<string, List<DevicePortStatus>>();
+
+        foreach (var item in location.Items)
         {
-            var item = new ButtonItem
-                       {
-                           Id = items.Id,
-                           Name = items.CustomName ?? items.Port.Name,
-                       };
+            var status = await GetPortStatusAsync(devicesStatuses, item.Port);
 
-            var status = await deviceConnector.GetPortStatusAsync(items.Port);
-            if (status.IsSuccess)
-                item.Name = $"{status.Data} {item.Name}";
+            var button = new ButtonItem
+                         {
+                             Id = item.Id,
+                             Name = status != null
+                                 ? $"{status} {item.FormattedName}"
+                                 : $"{item.FormattedName}",
+                         };
 
-            result.Buttons.Add(item);
+            result.Buttons.Add(button);
         }
 
         AppendNavigationButtons(location, result);
 
         return result;
+    }
+
+    private async Task<DevicePortStatus?> GetPortStatusAsync(IDictionary<string, List<DevicePortStatus>> devicesStatuses, DevicePort port)
+    {
+        if (!devicesStatuses.TryGetValue(port.Device.Id, out var statuses))
+        {
+            var deviceStatuses = await deviceConnector.GetDevicePortsStatusesAsync(port.Device);
+            
+            statuses = deviceStatuses.IsSuccess
+                ? deviceStatuses.Data!
+                : new();
+            
+            devicesStatuses.Add(port.Device.Id, statuses);
+        }
+
+        return statuses.FirstOrDefault(x => x.Port.Id == port.Id);
     }
 
     private static void AppendNavigationButtons(Location location, BotMenu menu)

@@ -60,12 +60,20 @@ public class MegaDConnector : IDeviceConnector
     {
         return InvokeOperations.InvokeOperationAsync(async () =>
         {
-            switch (port.OutMode)
+            switch (port.Type)
             {
-                case DeviceOutPortMode.SW when action.SWCommand.HasValue:
+                case DevicePortType.OUT:
                 {
-                    var url = GetUrl(port.Device, $"?cmd={port.Id}:{(int)action.SWCommand}");
-                    await SendRequestAsync(url);
+                    switch (port.OutMode)
+                    {
+                        case DeviceOutPortMode.SW when action.SWCommand.HasValue:
+                        {
+                            var url = GetUrl(port.Device, $"?cmd={port.Id}:{(int)action.SWCommand}");
+                            await SendRequestAsync(url);
+                            break;
+                        }
+                    }
+
                     break;
                 }
             }

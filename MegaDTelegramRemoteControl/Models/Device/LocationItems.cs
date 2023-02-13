@@ -6,4 +6,6 @@ public class LocationItems
     public required string? CustomName { get; init; }
     public required Device Device { get; init; }
     public required DevicePort Port { get; init; }
+
+    public string FormattedName => CustomName ?? Port.Name;
 }
