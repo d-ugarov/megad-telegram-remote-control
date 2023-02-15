@@ -126,27 +126,25 @@ public class HomeTriggerProcessor : IHomeTriggerProcessor
         {
             case DeviceOutPortMode.SW when triggerRule.Action.SWCommand.HasValue:
             {
+                DevicePortStatus? portStatus = null;
+
                 if (deviceStatuses.TryGetValue(triggerRule.Port.Device.Id, out var states))
                 {
-                    var state = states.FirstOrDefault(x => x.Port.Id == triggerRule.Port.Id);
-                    if (state != null && IsNewStatusEqual(state.InOutSwStatus, triggerRule.Action.SWCommand.Value))
+                    portStatus = states.FirstOrDefault(x => x.Port.Id == triggerRule.Port.Id);
+
+                    if (portStatus != null && IsNewStatusEqual(portStatus.InOutSwStatus, triggerRule.Action.SWCommand.Value))
                     {
-                        logger.LogTrace($"Trigger: skip command {triggerRule.Action.SWCommand.Value}, " +
-                                        $"{triggerRule.Port}");
-                        logger.LogCritical($"Trigger: skip command {triggerRule.Action.SWCommand.Value}, " +
-                                           $"{triggerRule.Port}");
+                        logger.LogCritical($"Trigger: skip command {triggerRule.Action.SWCommand}, {triggerRule.Port}");
                         return;
                     }
                 }
 
-                var command = DevicePortAction.CommandSW(triggerRule.Action.SWCommand.Value);
-                var result = await deviceConnector.InvokePortActionAsync(triggerRule.Port, command);
+                var command = ImproveCommand(triggerRule.Action.SWCommand.Value, portStatus);
+                var result = await deviceConnector.InvokePortActionAsync(triggerRule.Port, DevicePortAction.CommandSW(command));
 
-                logger.LogTrace($"Trigger: command {triggerRule.Action.SWCommand.Value}, " +
-                                $"{triggerRule.Port}: " +
-                                $"{result.Report()}");
-                logger.LogCritical($"Trigger: command {triggerRule.Action.SWCommand.Value}, " +
-                                   $"{triggerRule.Port}: " +
+                logger.LogCritical($"Trigger: command {triggerRule.Action.SWCommand}" +
+                                   (triggerRule.Action.SWCommand != command ? $" ({command})" : "") +
+                                   $", {triggerRule.Port}: " +
                                    $"{result.Report()}");
                 break;
             }
@@ -158,5 +156,12 @@ public class HomeTriggerProcessor : IHomeTriggerProcessor
         InOutSWStatus.On when action == DeviceOutPortCommand.On => true,
         InOutSWStatus.Off when action == DeviceOutPortCommand.Off => true,
         _ => false,
+    };
+    
+    private static DeviceOutPortCommand ImproveCommand(DeviceOutPortCommand command, DevicePortStatus? portStatus) => command switch
+    {
+        DeviceOutPortCommand.Switch when portStatus?.InOutSwStatus == InOutSWStatus.Off => DeviceOutPortCommand.On,
+        DeviceOutPortCommand.Switch when portStatus?.InOutSwStatus == InOutSWStatus.On => DeviceOutPortCommand.Off,
+        _ => command,
     };
 }
