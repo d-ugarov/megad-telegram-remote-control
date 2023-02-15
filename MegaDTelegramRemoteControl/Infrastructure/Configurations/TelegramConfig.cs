@@ -6,5 +6,5 @@ public record TelegramConfig
 {
     public string BotAccessToken { get; init; } = null!;
 
-    public HashSet<int> AllowedUsers { get; init; } = new();
+    public HashSet<long> AllowedUsers { get; init; } = new();
 }

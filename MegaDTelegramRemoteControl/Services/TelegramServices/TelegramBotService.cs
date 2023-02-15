@@ -4,11 +4,12 @@ using MegaDTelegramRemoteControl.Models;
 using MegaDTelegramRemoteControl.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
-using Telegram.Bot.Args;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -44,9 +45,15 @@ public class TelegramBotService : IBotService
             logger.LogTrace("TelegramBot starting..");
 
             bot = new TelegramBotClient(telegramConfig.BotAccessToken);
-            bot.OnMessage += async (_, args) => await OnMessageReceivedAsync(args);
-            bot.OnCallbackQuery += async (_, args) => await OnCallbackQueryReceivedAsync(args);
-            bot.StartReceiving();
+
+            bot.StartReceiving(
+                updateHandler: HandleUpdateAsync,
+                pollingErrorHandler: HandlePollingErrorAsync,
+                receiverOptions: new()
+                                 {
+                                     AllowedUpdates = Array.Empty<UpdateType>(),
+                                 }
+            );
 
             await bot.SetMyCommandsAsync(new List<BotCommand>
                                          {
@@ -62,23 +69,34 @@ public class TelegramBotService : IBotService
         });
     }
 
-    private Task OnMessageReceivedAsync(MessageEventArgs e)
+    private Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken ct) => update switch
+    {
+        {Message: { } message} => OnMessageReceivedAsync(message),
+        {CallbackQuery: { } callbackQuery} => OnCallbackQueryReceivedAsync(callbackQuery),
+        _ => OnUnknownUpdateReceivedAsync(update),
+    };
+
+    private Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception ex, CancellationToken ct)
+    {
+        logger.LogInformation($"HandleError: {ex}");
+        return Task.CompletedTask;
+    }
+
+    private Task OnMessageReceivedAsync(Message message)
     {
         return InvokeOperations.InvokeOperationAsync(async () =>
         {
-            if (e.Message == null)
-                return;
+            var allowed = IsUserAllowed(message.From);
 
-            var allowed = IsUserAllowed(e.Message.From);
-            logger.LogTrace($"[OnMessageReceived] " +
-                            $"From: {e.Message.From.Username} ({e.Message.From.Id}), " +
+            logger.LogTrace("[OnMessageReceived] " +
+                            $"From: {(message.From != null ? $"{message.From.Username} ({message.From.Id})" : "unknown")}, " +
                             $"allowed: {allowed}, " +
-                            $"message: {e.Message.Text}");
+                            $"message: {message.Text}");
 
             if (!allowed)
                 return;
 
-            await ProcessMessageAsync(e.Message);
+            await ProcessMessageAsync(message);
         });
     }
 
@@ -98,36 +116,43 @@ public class TelegramBotService : IBotService
         }
     }
 
-    private Task OnCallbackQueryReceivedAsync(CallbackQueryEventArgs e)
+    private Task OnCallbackQueryReceivedAsync(CallbackQuery callbackQuery)
     {
         return InvokeOperations.InvokeOperationAsync(async () =>
         {
-            if (e.CallbackQuery == null)
-                return;
+            var allowed = IsUserAllowed(callbackQuery.From);
 
-            var allowed = IsUserAllowed(e.CallbackQuery.From);
-            logger.LogTrace($"[OnCallbackQueryReceived] " +
-                            $"From: {e.CallbackQuery.From.Username} ({e.CallbackQuery.From.Id}), " +
+            logger.LogTrace("[OnCallbackQueryReceived] " +
+                            $"From: {callbackQuery.From.Username} ({callbackQuery.From.Id}), " +
                             $"allowed: {allowed}, " +
-                            $"message: {e.CallbackQuery.Data}");
+                            $"message: {callbackQuery.Data}");
 
             if (!allowed)
                 return;
 
-            await bot.AnswerCallbackQueryAsync(e.CallbackQuery.Id);
-
-            await ProcessCallbackQueryAsync(e.CallbackQuery);
+            await ProcessCallbackQueryAsync(callbackQuery);
         });
     }
 
     private async Task ProcessCallbackQueryAsync(CallbackQuery callbackQuery)
     {
+        await bot.AnswerCallbackQueryAsync(callbackQuery.Id);
+        
         var menu = await botHandler.ProcessActionAsync(callbackQuery.Data);
 
-        var chatId = new ChatId(callbackQuery.Message.Chat.Id);
-        var (text, inlineKeyboard) = GetFormattedAnswer(menu);
+        if (callbackQuery.Message != null)
+        {
+            var chatId = new ChatId(callbackQuery.Message.Chat.Id);
+            var (text, inlineKeyboard) = GetFormattedAnswer(menu);
 
-        await EditMessageAsync(text, inlineKeyboard, chatId, callbackQuery.Message);
+            await EditMessageAsync(text, inlineKeyboard, chatId, callbackQuery.Message);
+        }
+    }
+
+    private Task OnUnknownUpdateReceivedAsync(Update update)
+    {
+        logger.LogTrace($"[OnUnknownUpdateReceived] Type: {update.Type}");
+        return Task.CompletedTask;
     }
 
     private static (string text, InlineKeyboardMarkup inlineKeyboard) GetFormattedAnswer(BotMenu menu)
@@ -172,10 +197,10 @@ public class TelegramBotService : IBotService
 
     private Task EditMessageAsync(string text, InlineKeyboardMarkup inlineKeyboard, ChatId chatId, Message message)
     {
-        return bot.EditMessageTextAsync(chatId, message.MessageId, text, ParseMode.Default, replyMarkup: inlineKeyboard);
+        return bot.EditMessageTextAsync(chatId, message.MessageId, text, ParseMode.MarkdownV2, replyMarkup: inlineKeyboard);
     }
 
-    private bool IsUserAllowed(User user) => !telegramConfig.AllowedUsers.Any() ||
-                                             telegramConfig.AllowedUsers.Contains(user.Id);
+    private bool IsUserAllowed(User? user) => !telegramConfig.AllowedUsers.Any() ||
+                                              (user != null && telegramConfig.AllowedUsers.Contains(user.Id));
 
 }
