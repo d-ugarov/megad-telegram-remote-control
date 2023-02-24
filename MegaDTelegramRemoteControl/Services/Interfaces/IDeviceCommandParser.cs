@@ -8,5 +8,5 @@ public interface IDeviceCommandParser
 {
     DeviceEvent ParseEvent(string deviceId, IReadOnlyCollection<NewEventData> eventData);
 
-    DevicePortStatus ParseStatus(DevicePort port, string portStatus);
+    DevicePortInfo ParseStatus(DevicePort port, string portStatus);
 }

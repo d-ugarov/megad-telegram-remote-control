@@ -1,5 +1,6 @@
 ﻿using MegaDTelegramRemoteControl.Infrastructure.Configurations;
 using MegaDTelegramRemoteControl.Infrastructure.JobScheduler.BaseServices;
+using MegaDTelegramRemoteControl.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -15,17 +16,26 @@ public class JobScheduler : JobSchedulerBase
     {
     }
 
-    protected override Task<ProcessJobStatus> ProcessJobAsync(string jobName, IServiceScope scope)
+    protected override async Task<ProcessJobStatus> ProcessJobAsync(string jobName, IServiceScope scope)
     {
         var processStatus = ProcessJobStatus.Ok;
 
         switch (jobName)
         {
+            case "UpdateHomeState":
+                await UpdateHomeStateAsync(scope);
+                break;
             default:
                 processStatus = ProcessJobStatus.JobNotFound;
                 break;
         }
 
-        return Task.FromResult(processStatus);
+        return processStatus;
+    }
+
+    private static async Task UpdateHomeStateAsync(IServiceScope scope)
+    {
+        var rateService = scope.ServiceProvider.GetRequiredService<IHomeService>();
+        await rateService.UpdateCurrentStateAsync();
     }
 }

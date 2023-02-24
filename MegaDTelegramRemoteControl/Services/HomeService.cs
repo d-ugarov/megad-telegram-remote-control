@@ -1,12 +1,10 @@
 ﻿using MegaDTelegramRemoteControl.Models;
 using MegaDTelegramRemoteControl.Models.Device;
-using MegaDTelegramRemoteControl.Models.Device.Enums;
+using MegaDTelegramRemoteControl.Models.Home;
 using MegaDTelegramRemoteControl.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
+using System.Threading.Tasks;
 using Device = MegaDTelegramRemoteControl.Models.Device.Device;
 using DevicePort = MegaDTelegramRemoteControl.Models.Device.DevicePort;
 
@@ -14,134 +12,53 @@ namespace MegaDTelegramRemoteControl.Services;
 
 public class HomeService : IHomeService
 {
-    private readonly Dictionary<Device, Dictionary<DevicePort, List<DevicePortEvent>>> current;
-    private readonly ReaderWriterLockSlim locker;
-    private readonly ILogger<HomeService> logger;
+    private readonly Dictionary<Device, Dictionary<DevicePort, HomePortStatus>> currentState;
     private readonly HomeConfig homeConfig;
 
-    public HomeService(ILogger<HomeService> logger, HomeConfig homeConfig)
+    private readonly IDeviceConnector deviceConnector;
+    private readonly ILogger<HomeService> logger;
+
+    public HomeService(HomeConfig homeConfig, ILogger<HomeService> logger, IDeviceConnector deviceConnector)
     {
-        current = new Dictionary<Device, Dictionary<DevicePort, List<DevicePortEvent>>>();
-        locker = new ReaderWriterLockSlim();
+        currentState = new();
 
         this.logger = logger;
         this.homeConfig = homeConfig;
+        this.deviceConnector = deviceConnector;
     }
 
     public Dictionary<string, Device> Devices => homeConfig.Devices;
 
     public List<Location> Locations => homeConfig.Locations;
 
-    #region Set
-
-    public void Set(DeviceEvent deviceEvent)
+    public async Task UpdateCurrentStateAsync()
     {
-        try
+        foreach (var (_, device) in homeConfig.Devices)
         {
-            if (!deviceEvent.IsParsedSuccessfully)
-                return;
+            var portsInfo = await deviceConnector.GetDevicePortsStatusesAsync(device);
+            if (!portsInfo.IsSuccess)
+                continue;
 
-            locker.EnterWriteLock();
-
-            switch (deviceEvent.Type)
+            if (!currentState.TryGetValue(device, out var values))
             {
-                case DeviceEventType.DeviceStarted:
-                    SetDeviceStarted(deviceEvent);
-                    break;
-                case DeviceEventType.PortEvent:
-                    SetPortEvent(deviceEvent);
-                    break;
+                values = new();
+                currentState.Add(device, values);
             }
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e.ToString());
-            throw;
-        }
-        finally
-        {
-            locker.ExitWriteLock();
-        }
-    }
 
-    private void SetDeviceStarted(DeviceEvent deviceEvent)
-    {
-        current.Remove(deviceEvent.Device!);
-    }
-
-    private void SetPortEvent(DeviceEvent deviceEvent)
-    {
-        if (!current.TryGetValue(deviceEvent.Device!, out var statePorts))
-        {
-            statePorts = new Dictionary<DevicePort, List<DevicePortEvent>>();
-            current.Add(deviceEvent.Device!, statePorts);
-        }
-
-        if (!statePorts.TryGetValue(deviceEvent.Event!.Port, out var events))
-        {
-            events = new List<DevicePortEvent>();
-            statePorts[deviceEvent.Event.Port] = events;
-        }
-
-        events.Add(deviceEvent.Event);
-    }
-
-    #endregion
-
-    #region Get
-
-    public DevicePortEvent? Get(DevicePort port)
-    {
-        try
-        {
-            locker.EnterReadLock();
-
-            return default;
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e.ToString());
-            throw;
-        }
-        finally
-        {
-            locker.ExitReadLock();
-        }
-    }
-
-    #endregion
-
-    #region Clean
-
-    public void Clean()
-    {
-        try
-        {
-            locker.EnterWriteLock();
-
-            foreach (var ports in current.Values)
+            foreach (var info in portsInfo.Data!)
             {
-                foreach (var port in ports.Keys)
+                if (values.TryGetValue(info.Port, out var value))
                 {
-                    var portEvents = ports[port];
-
-                    if (!portEvents.Any())
-                        continue;
-
-                    ports[port] = portEvents.Where(x => x.Date > DateTime.UtcNow.AddHours(-1)).ToList();
+                    if (!value.IsEqual(info.Port, info.Status))
+                    {
+                        value.SetNewStatus(info.Status);
+                    }
+                }
+                else
+                {
+                    values.Add(info.Port, new(info.Status));
                 }
             }
         }
-        catch (Exception e)
-        {
-            logger.LogError(e.ToString());
-            throw;
-        }
-        finally
-        {
-            locker.ExitWriteLock();
-        }
     }
-
-    #endregion
 }

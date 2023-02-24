@@ -7,9 +7,9 @@ namespace MegaDTelegramRemoteControl.Services.Interfaces;
 
 public interface IDeviceConnector
 {
-    Task<OperationResult<DevicePortStatus>> GetPortStatusAsync(DevicePort port);
+    Task<OperationResult<DevicePortInfo>> GetPortStatusAsync(DevicePort port);
 
-    Task<OperationResult<List<DevicePortStatus>>> GetDevicePortsStatusesAsync(Device device);
+    Task<OperationResult<List<DevicePortInfo>>> GetDevicePortsStatusesAsync(Device device);
 
     Task<OperationResult> InvokePortActionAsync(DevicePort port, DevicePortAction action);
 }

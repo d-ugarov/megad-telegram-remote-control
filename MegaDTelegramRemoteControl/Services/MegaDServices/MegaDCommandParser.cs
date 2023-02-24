@@ -192,7 +192,7 @@ public class MegaDCommandParser : IDeviceCommandParser
 
     #region Port status
 
-    public DevicePortStatus ParseStatus(DevicePort port, string portStatus)
+    public DevicePortInfo ParseStatus(DevicePort port, string portStatus)
     {
         var parser = port.Type switch
         {

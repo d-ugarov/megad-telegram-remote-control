@@ -130,7 +130,7 @@ public class TelegramBotHandler : IBotHandler
                                });
         }
 
-        var devicesStatuses = new Dictionary<string, List<DevicePortStatus>>();
+        var devicesStatuses = new Dictionary<string, List<DevicePortInfo>>();
 
         foreach (var item in location.Items)
         {
@@ -153,7 +153,7 @@ public class TelegramBotHandler : IBotHandler
 
                 switch (condition.Type)
                 {
-                    case LocationConditionType.PortOutCurrentStatus when status?.InOutSwStatus == condition.Status:
+                    case LocationConditionType.PortOutCurrentStatus when status?.Status.InOutSwStatus == condition.Status:
                     {
                         result.Buttons.Add(new ButtonItem
                                            {
@@ -171,7 +171,7 @@ public class TelegramBotHandler : IBotHandler
         return result;
     }
 
-    private async Task<DevicePortStatus?> GetPortStatusAsync(IDictionary<string, List<DevicePortStatus>> devicesStatuses, DevicePort port)
+    private async Task<DevicePortInfo?> GetPortStatusAsync(IDictionary<string, List<DevicePortInfo>> devicesStatuses, DevicePort port)
     {
         if (!devicesStatuses.TryGetValue(port.Device.Id, out var statuses))
         {

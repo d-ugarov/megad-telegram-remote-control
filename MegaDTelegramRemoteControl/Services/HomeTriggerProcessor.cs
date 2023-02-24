@@ -39,7 +39,7 @@ public class HomeTriggerProcessor : IHomeTriggerProcessor
     private async Task<TriggerResult> ProcessDeviceEventAsync(DeviceEvent deviceEvent)
     {
         var result = TriggerResult.Default;
-        var deviceStatuses = new Dictionary<string, List<DevicePortStatus>>();
+        var deviceStatuses = new Dictionary<string, List<DevicePortInfo>>();
 
         foreach (var device in deviceEvent.Event!.Port.TriggerRulesRequiredDevices)
         {
@@ -86,7 +86,7 @@ public class HomeTriggerProcessor : IHomeTriggerProcessor
     }
 
     private static bool CheckAdditionalConditionsAllowed(AdditionalConditions? additionalConditions,
-        IReadOnlyDictionary<string, List<DevicePortStatus>> deviceStatuses)
+        IReadOnlyDictionary<string, List<DevicePortInfo>> deviceStatuses)
     {
         if (additionalConditions == null)
             return true;
@@ -101,7 +101,7 @@ public class HomeTriggerProcessor : IHomeTriggerProcessor
             var state = states.FirstOrDefault(x => x.Port.Id == conditionsPort.Id);
             if (state != null)
             {
-                statuses.Add(state.InOutSwStatus);
+                statuses.Add(state.Status.InOutSwStatus);
             }
         }
 
@@ -120,19 +120,19 @@ public class HomeTriggerProcessor : IHomeTriggerProcessor
         };
     }
 
-    private async Task ProcessDeviceInEventAsync(DestinationTriggerRule triggerRule, IReadOnlyDictionary<string, List<DevicePortStatus>> deviceStatuses)
+    private async Task ProcessDeviceInEventAsync(DestinationTriggerRule triggerRule, IReadOnlyDictionary<string, List<DevicePortInfo>> deviceStatuses)
     {
         switch (triggerRule.Port.OutMode)
         {
             case DeviceOutPortMode.SW when triggerRule.Action.SWCommand.HasValue:
             {
-                DevicePortStatus? portStatus = null;
+                DevicePortInfo? portStatus = null;
 
                 if (deviceStatuses.TryGetValue(triggerRule.Port.Device.Id, out var states))
                 {
                     portStatus = states.FirstOrDefault(x => x.Port.Id == triggerRule.Port.Id);
 
-                    if (portStatus != null && IsNewStatusEqual(portStatus.InOutSwStatus, triggerRule.Action.SWCommand.Value))
+                    if (portStatus != null && IsNewStatusEqual(portStatus.Status.InOutSwStatus, triggerRule.Action.SWCommand.Value))
                     {
                         logger.LogCritical($"Trigger: skip command {triggerRule.Action.SWCommand}, {triggerRule.Port}");
                         return;
@@ -158,10 +158,10 @@ public class HomeTriggerProcessor : IHomeTriggerProcessor
         _ => false,
     };
     
-    private static DeviceOutPortCommand ImproveCommand(DeviceOutPortCommand command, DevicePortStatus? portStatus) => command switch
+    private static DeviceOutPortCommand ImproveCommand(DeviceOutPortCommand command, DevicePortInfo? portStatus) => command switch
     {
-        DeviceOutPortCommand.Switch when portStatus?.InOutSwStatus == InOutSWStatus.Off => DeviceOutPortCommand.On,
-        DeviceOutPortCommand.Switch when portStatus?.InOutSwStatus == InOutSWStatus.On => DeviceOutPortCommand.Off,
+        DeviceOutPortCommand.Switch when portStatus?.Status.InOutSwStatus == InOutSWStatus.Off => DeviceOutPortCommand.On,
+        DeviceOutPortCommand.Switch when portStatus?.Status.InOutSwStatus == InOutSWStatus.On => DeviceOutPortCommand.Off,
         _ => command,
     };
 }

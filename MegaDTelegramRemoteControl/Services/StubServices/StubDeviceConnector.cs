@@ -19,12 +19,12 @@ public class StubDeviceConnector : IDeviceConnector
         this.deviceDataParser = deviceDataParser;
     }
 
-    public Task<OperationResult<DevicePortStatus>> GetPortStatusAsync(DevicePort port)
+    public Task<OperationResult<DevicePortInfo>> GetPortStatusAsync(DevicePort port)
     {
         return Task.FromResult(InvokeOperations.InvokeOperation(() => GetRandomPortStatus(port)));
     }
 
-    public Task<OperationResult<List<DevicePortStatus>>> GetDevicePortsStatusesAsync(Device device)
+    public Task<OperationResult<List<DevicePortInfo>>> GetDevicePortsStatusesAsync(Device device)
     {
         return Task.FromResult(InvokeOperations.InvokeOperation(() => device.Ports.Values.Select(GetRandomPortStatus).ToList()));
     }
@@ -34,7 +34,7 @@ public class StubDeviceConnector : IDeviceConnector
         return Task.FromResult(OperationResult.Ok());
     }
 
-    private DevicePortStatus GetRandomPortStatus(DevicePort port)
+    private DevicePortInfo GetRandomPortStatus(DevicePort port)
     {
         var bytes = new byte[8];
 

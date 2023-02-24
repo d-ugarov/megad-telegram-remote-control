@@ -4,5 +4,5 @@ namespace MegaDTelegramRemoteControl.Services.MegaDServices.StatusParsers;
 
 public interface IStatusParser
 {
-    DevicePortStatus Parse(DevicePort devicePort, string portStatus);
+    DevicePortInfo Parse(DevicePort devicePort, string portStatus);
 }

@@ -24,7 +24,7 @@ public class MegaDConnector : IDeviceConnector
         this.deviceCommandParser = deviceCommandParser;
     }
 
-    public Task<OperationResult<DevicePortStatus>> GetPortStatusAsync(DevicePort port)
+    public Task<OperationResult<DevicePortInfo>> GetPortStatusAsync(DevicePort port)
     {
         return InvokeOperations.InvokeOperationAsync(async () =>
         {
@@ -34,13 +34,13 @@ public class MegaDConnector : IDeviceConnector
         });
     }
 
-    public Task<OperationResult<List<DevicePortStatus>>> GetDevicePortsStatusesAsync(Device device)
+    public Task<OperationResult<List<DevicePortInfo>>> GetDevicePortsStatusesAsync(Device device)
     {
         return InvokeOperations.InvokeOperationAsync(async () =>
         {
             var url = GetUrl(device, "?cmd=all");
             var data = await SendRequestAsync(url);
-            var result = new List<DevicePortStatus>();
+            var result = new List<DevicePortInfo>();
 
             var statuses = data.Split(';');
 
