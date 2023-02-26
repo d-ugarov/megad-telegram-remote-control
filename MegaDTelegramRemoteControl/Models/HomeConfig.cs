@@ -10,6 +10,7 @@ public class HomeConfig
 {
     public Dictionary<string, Device.Device> Devices { get; init; } = new();
     public List<Location> Locations { get; init; } = new();
+    public List<Scheduler.Scheduler> Schedulers { get; init; } = new();
 
     public override string ToString()
     {

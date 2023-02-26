@@ -7,13 +7,39 @@ namespace MegaDTelegramRemoteControl.Infrastructure.Configurations;
 public record AutomationConfig
 {
     public List<TriggerRule> Triggers { get; init; } = new();
+    public List<SchedulerRule> Schedulers { get; init; } = new();
 }
+
+#region Scheduler
+
+public record SchedulerRule
+{
+    public string Title { get; init; } = "";
+    public SchedulerType Type { get; init; }
+    public SchedulerRuleConditions? Conditions { get; init; }
+    public List<TriggerRuleDestinationPortState> DestinationPortStates { get; init; } = null!;
+}
+
+public enum SchedulerType
+{
+    StartOnTime,
+    StartByCondition,
+}
+
+public record SchedulerRuleConditions : TriggerRuleAdditionalConditions
+{
+    public TimeSpan Period { get; init; }
+}
+
+#endregion
+
+#region Triggers
 
 public record TriggerRule
 {
-    public TriggerRuleSourcePortState SourcePortState { get; set; } = null!;
-    public TriggerRuleAdditionalConditions? AdditionalConditions { get; set; }
-    public TriggerRuleDestinationPortState[] DestinationPortStates { get; set; } = null!;
+    public TriggerRuleSourcePortState SourcePortState { get; init; } = null!;
+    public TriggerRuleAdditionalConditions? AdditionalConditions { get; init; }
+    public List<TriggerRuleDestinationPortState> DestinationPortStates { get; init; } = null!;
     public TriggerResult Result { get; init; }
     public bool IsFinal { get; init; }
 }
@@ -31,9 +57,9 @@ public record TriggerRuleSourcePortState : TriggerRulePort
 
 public record TriggerRuleAdditionalConditions
 {
-    public TriggerRulePort[] Ports { get; set; } = Array.Empty<TriggerRulePort>();
-    public ConditionType Type { get; set; }
-    public InOutSWStatus? Status { get; set; }
+    public List<TriggerRulePort> Ports { get; init; } = new();
+    public ConditionType Type { get; init; }
+    public InOutSWStatus? Status { get; init; }
 }
 
 public enum ConditionType
@@ -54,7 +80,7 @@ public record TriggerRuleDestinationPortState
 
 public record TriggerRuleSourcePortStatus
 {
-    public DeviceInPortCommand[] InPortCommands { get; init; } = Array.Empty<DeviceInPortCommand>();
+    public List<DeviceInPortCommand> InPortCommands { get; init; } = new();
 }
 
 public record TriggerRuleAction
@@ -67,3 +93,5 @@ public enum TriggerResult
     Default,
     DoNothing,
 }
+
+#endregion
