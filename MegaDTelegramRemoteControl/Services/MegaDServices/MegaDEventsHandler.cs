@@ -11,16 +11,16 @@ namespace MegaDTelegramRemoteControl.Services.MegaDServices;
 public class MegaDEventsHandler : IMegaDEventsHandler
 {
     private readonly IDeviceCommandParser deviceCommandParser;
-    private readonly IHomeTriggerProcessor homeTriggerProcessor;
+    private readonly IHomeProcessor homeProcessor;
     private readonly ILogger<MegaDEventsHandler> logger;
 
     public MegaDEventsHandler(IDeviceCommandParser deviceCommandParser,
         ILogger<MegaDEventsHandler> logger,
-        IHomeTriggerProcessor homeTriggerProcessor)
+        IHomeProcessor homeProcessor)
     {
         this.deviceCommandParser = deviceCommandParser;
         this.logger = logger;
-        this.homeTriggerProcessor = homeTriggerProcessor;
+        this.homeProcessor = homeProcessor;
     }
 
     public Task<OperationResult<NewEventResult>> OnNewEventAsync(string deviceId, IReadOnlyCollection<NewEventData> eventData)
@@ -35,7 +35,7 @@ public class MegaDEventsHandler : IMegaDEventsHandler
             if (!deviceEvent.IsParsedSuccessfully)
                 return NewEventResult.Default;
 
-            var triggerResult = await homeTriggerProcessor.ProcessAsync(deviceEvent);
+            var triggerResult = await homeProcessor.ProcessDeviceEventAsync(deviceEvent);
 
             return triggerResult switch
             {

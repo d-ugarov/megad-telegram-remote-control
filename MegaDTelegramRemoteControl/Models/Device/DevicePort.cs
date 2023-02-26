@@ -1,5 +1,6 @@
 ﻿using MegaDTelegramRemoteControl.Infrastructure.Configurations;
 using MegaDTelegramRemoteControl.Infrastructure.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -46,4 +47,9 @@ public record DevicePort
 
     public override string ToString() => $"port: {Name} " +
                                          $"({Type},{(Type == DevicePortType.OUT ? $" {outMode}," : "")} {Device.Name})";
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Id, (int)Type, Name, Device.GetHashCode());
+    }
 }

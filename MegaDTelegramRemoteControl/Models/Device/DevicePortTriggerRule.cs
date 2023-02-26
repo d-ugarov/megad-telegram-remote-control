@@ -1,5 +1,6 @@
 ﻿using MegaDTelegramRemoteControl.Infrastructure.Configurations;
 using MegaDTelegramRemoteControl.Models.Device.Enums;
+using MegaDTelegramRemoteControl.Models.Interfaces;
 using System;
 using System.Collections.Generic;
 
@@ -14,7 +15,7 @@ public record DevicePortTriggerRule
     public required bool IsFinal { get; init; }
 }
 
-public record DestinationTriggerRule
+public record DestinationTriggerRule : IDestinationRule
 {
     public required DevicePort Port { get; init; }
     public required TriggerRuleAction Action { get; init; }
@@ -22,7 +23,7 @@ public record DestinationTriggerRule
     public required TimeSpan? DelayAfterAction { get; init; }
 }
 
-public record AdditionalConditions
+public record AdditionalConditions : IConditions
 {
     public List<DevicePort> Ports { get; } = new();
     public required ConditionType Type { get; init; }

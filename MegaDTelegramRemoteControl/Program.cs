@@ -88,7 +88,7 @@ void ConfigureServices(WebApplicationBuilder builder)
     builder.Services.AddSingleton<IBotService, TelegramBotService>();
     builder.Services.AddTransient<IBotHandler, TelegramBotHandler>();
     builder.Services.AddTransient<IMegaDEventsHandler, MegaDEventsHandler>();
-    builder.Services.AddTransient<IHomeTriggerProcessor, HomeTriggerProcessor>();
+    builder.Services.AddTransient<IHomeProcessor, HomeProcessor>();
     builder.Services.AddSingleton<IWarmupCacheService, InitService>();
     builder.Services.AddTransient<IDeviceCommandParser, MegaDCommandParser>();
 

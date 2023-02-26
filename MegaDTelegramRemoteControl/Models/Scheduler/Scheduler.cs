@@ -1,5 +1,6 @@
 ﻿using MegaDTelegramRemoteControl.Infrastructure.Configurations;
 using MegaDTelegramRemoteControl.Models.Device.Enums;
+using MegaDTelegramRemoteControl.Models.Interfaces;
 using System;
 using System.Collections.Generic;
 using DevicePort = MegaDTelegramRemoteControl.Models.Device.DevicePort;
@@ -14,7 +15,7 @@ public record Scheduler
     public List<SchedulerDestinationPortRule> DestinationPortRules { get; } = new();
 }
     
-public record SchedulerConditions
+public record SchedulerConditions : IConditions
 {
     public List<DevicePort> Ports { get; } = new();
     public required ConditionType Type { get; init; }
@@ -22,7 +23,7 @@ public record SchedulerConditions
     public TimeSpan Period { get; init; }
 }
 
-public record SchedulerDestinationPortRule
+public record SchedulerDestinationPortRule : IDestinationRule
 {
     public required DevicePort Port { get; init; }
     public required TriggerRuleAction Action { get; init; }

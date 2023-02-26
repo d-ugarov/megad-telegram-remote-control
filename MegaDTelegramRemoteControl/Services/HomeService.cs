@@ -1,8 +1,10 @@
 ﻿using MegaDTelegramRemoteControl.Models;
 using MegaDTelegramRemoteControl.Models.Device;
 using MegaDTelegramRemoteControl.Models.Home;
+using MegaDTelegramRemoteControl.Models.Scheduler;
 using MegaDTelegramRemoteControl.Services.Interfaces;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Device = MegaDTelegramRemoteControl.Models.Device.Device;
 using DevicePort = MegaDTelegramRemoteControl.Models.Device.DevicePort;
@@ -11,7 +13,7 @@ namespace MegaDTelegramRemoteControl.Services;
 
 public class HomeService : IHomeService
 {
-    private readonly Dictionary<Device, Dictionary<DevicePort, HomePortStatus>> currentState;
+    private readonly ConcurrentDictionary<Device, ConcurrentDictionary<DevicePort, HomePortStatus>> currentState;
     private readonly HomeConfig homeConfig;
 
     private readonly ILogger<HomeService> logger;
@@ -28,27 +30,44 @@ public class HomeService : IHomeService
 
     public List<Location> Locations => homeConfig.Locations;
 
-    public void UpdateCurrentState(Device device, IEnumerable<DevicePortInfo> devicePortsInfos)
+    public List<Scheduler> Schedulers => homeConfig.Schedulers;
+
+    public List<UpdatedPortStatus> UpdateCurrentState(Device device, IEnumerable<DevicePortInfo> devicePortsInfos)
     {
-        if (!currentState.TryGetValue(device, out var values))
+        var result = new List<UpdatedPortStatus>();
+
+        if (!currentState.TryGetValue(device, out var deviceStates))
         {
-            values = new();
-            currentState.Add(device, values);
+            deviceStates = new();
+            currentState[device] = deviceStates;
         }
 
         foreach (var info in devicePortsInfos)
         {
-            if (values.TryGetValue(info.Port, out var value))
+            if (deviceStates.TryGetValue(info.Port, out var portState))
             {
-                if (!value.IsEqual(info.Port, info.Status))
+                if (!portState.IsEqual(info.Port, info.Status))
                 {
-                    value.SetNewStatus(info.Status);
+                    portState.SetNewStatus(info.Status);
+                    result.Add(new(portState, info.Port));
                 }
             }
             else
             {
-                values.Add(info.Port, new(info.Status));
+                portState = new HomePortStatus(info.Status);
+                deviceStates[info.Port] = portState;
+                result.Add(new(portState, info.Port));
             }
         }
+
+        return result;
+    }
+
+    public HomePortStatus? GetPortStatus(DevicePort port)
+    {
+        return currentState.TryGetValue(port.Device, out var ports) &&
+               ports.TryGetValue(port, out var portStatus)
+            ? portStatus
+            : null;
     }
 }
