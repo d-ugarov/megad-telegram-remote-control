@@ -51,7 +51,7 @@ public class MegaDCommandParser : IDeviceCommandParser
         {
             case DeviceEventType.PortEvent:
             {
-                if (!TryGetDevicePort(portId, result.Device.Ports, out var portEvent) || portEvent is null)
+                if (!TryGetDevicePort(portId.Value, result.Device.Ports, out var portEvent) || portEvent is null)
                     return result;
 
                 result.Event = portEvent;
@@ -78,17 +78,17 @@ public class MegaDCommandParser : IDeviceCommandParser
         return result;
     }
 
-    private static bool TryGetEventType(IEnumerable<NewEventData> eventData, out string? portId, out DeviceEventType? eventType)
+    private static bool TryGetEventType(IEnumerable<NewEventData> eventData, out int? portId, out DeviceEventType? eventType)
     {
         foreach (var (key, value) in eventData)
         {
             foreach (var (command, type) in Constants.DeviceEventTypes)
             {
-                if (!key.Equals(command))
+                if (!key.Equals(command) || !int.TryParse(value, out var intValue))
                     continue;
 
                 eventType = type;
-                portId = value;
+                portId = intValue;
                 return true;
             }
         }
@@ -98,7 +98,7 @@ public class MegaDCommandParser : IDeviceCommandParser
         return false;
     }
 
-    private static bool TryGetDevicePort(string portId, IReadOnlyDictionary<string, DevicePort> devicePorts, out DevicePortEvent? portEvent)
+    private static bool TryGetDevicePort(int portId, IReadOnlyDictionary<int, DevicePort> devicePorts, out DevicePortEvent? portEvent)
     {
         if (!devicePorts.TryGetValue(portId, out var port))
         {

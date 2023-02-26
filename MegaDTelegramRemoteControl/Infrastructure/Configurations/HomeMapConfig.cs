@@ -20,7 +20,7 @@ public record Location
 public record LocationItems
 {
     public string DeviceId { get; init; } = null!;
-    public string PortId { get; init; } = null!;
+    public int PortId { get; init; }
     public string? CustomName { get; init; }
 }
 

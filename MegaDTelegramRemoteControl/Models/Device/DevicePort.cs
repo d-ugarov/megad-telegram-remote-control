@@ -10,7 +10,7 @@ public record DevicePort
     private readonly DeviceOutPortMode? outMode;
     private List<Device>? triggersRequiredDevices;
 
-    public required string Id { get; init; }
+    public required int Id { get; init; }
     public required DevicePortType Type { get; init; }
     public required string Name { get; init; }
 

@@ -46,7 +46,7 @@ public class MegaDConnector : IDeviceConnector
 
             for (var i = 0; i < statuses.Length; i++)
             {
-                if (!device.Ports.TryGetValue(i.ToString(), out var port))
+                if (!device.Ports.TryGetValue(i, out var port))
                     continue;
 
                 result.Add(deviceCommandParser.ParseStatus(port, statuses[i]));

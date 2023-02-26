@@ -98,8 +98,7 @@ void ConfigureServices(WebApplicationBuilder builder)
     builder.Services.AddSingleton<IHomeService, HomeService>(x =>
         new HomeService(
             homeConfig,
-            x.GetRequiredService<ILogger<HomeService>>(),
-            x.GetRequiredService<IDeviceConnector>()));
+            x.GetRequiredService<ILogger<HomeService>>()));
 
     if (!platformConfig.UseFakeDeviceConnector)
         builder.Services.AddHttpClient<IDeviceConnector, MegaDConnector>();

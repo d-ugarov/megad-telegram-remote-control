@@ -25,7 +25,7 @@ public record Device
 
 public record DevicePort
 {
-    public string Id { get; init; } = null!;
+    public int Id { get; init; }
     public DevicePortType Type { get; init; }
     public string Name { get; init; } = null!;
     public DeviceOutPortMode? OutMode { get; init; }

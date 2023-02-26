@@ -1,11 +1,12 @@
 ﻿using MegaDTelegramRemoteControl.Models.Device.Enums;
 using System;
+using System.Collections.Generic;
 
 namespace MegaDTelegramRemoteControl.Infrastructure.Configurations;
 
 public record AutomationConfig
 {
-    public TriggerRule[] Triggers { get; init; } = Array.Empty<TriggerRule>();
+    public List<TriggerRule> Triggers { get; init; } = new();
 }
 
 public record TriggerRule
@@ -20,7 +21,7 @@ public record TriggerRule
 public record TriggerRulePort
 {
     public string DeviceId { get; init; } = null!;
-    public string PortId { get; init; } = null!;
+    public int PortId { get; init; }
 }
 
 public record TriggerRuleSourcePortState : TriggerRulePort
@@ -45,7 +46,7 @@ public enum ConditionType
 public record TriggerRuleDestinationPortState
 {
     public string DeviceId { get; init; } = null!;
-    public string PortId { get; init; } = null!;
+    public int PortId { get; init; }
     public TriggerRuleAction Action { get; init; } = null!;
     public int DelayBeforeActionInMilliseconds { get; init; }
     public int DelayAfterActionInMilliseconds { get; init; }

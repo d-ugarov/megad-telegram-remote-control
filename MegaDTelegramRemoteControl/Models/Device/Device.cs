@@ -4,5 +4,5 @@ namespace MegaDTelegramRemoteControl.Models.Device;
 
 public record Device(string Id, string Name, string Ip, string Pwd)
 {
-    public Dictionary<string, DevicePort> Ports { get; } = new();
+    public Dictionary<int, DevicePort> Ports { get; } = new();
 }

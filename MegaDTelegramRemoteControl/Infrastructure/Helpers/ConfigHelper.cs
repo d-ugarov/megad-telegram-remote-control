@@ -35,7 +35,7 @@ public static class ConfigHelper
     {
         var result = new Dictionary<string, Device>();
 
-        bool TryGetPort(string deviceId, string portId, [MaybeNullWhen(false)] out DevicePort port)
+        bool TryGetPort(string deviceId, int portId, [MaybeNullWhen(false)] out DevicePort port)
         {
             port = null;
             return result.TryGetValue(deviceId, out var device) &&
