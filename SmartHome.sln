@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHome", "SmartHome\SmartHome.csproj", "{1211943F-2468-4F52-AD45-623A54C38F46}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHome.Integrations.MegaD", "SmartHome.Integrations.MegaD\SmartHome.Integrations.MegaD.csproj", "{F1844488-F009-48B9-98AD-676A35491A32}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHome.Common", "SmartHome.Common\SmartHome.Common.csproj", "{D81DD08B-A1D7-440B-A5BC-A179218CA584}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1211943F-2468-4F52-AD45-623A54C38F46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1211943F-2468-4F52-AD45-623A54C38F46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1211943F-2468-4F52-AD45-623A54C38F46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1211943F-2468-4F52-AD45-623A54C38F46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1844488-F009-48B9-98AD-676A35491A32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1844488-F009-48B9-98AD-676A35491A32}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1844488-F009-48B9-98AD-676A35491A32}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1844488-F009-48B9-98AD-676A35491A32}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D81DD08B-A1D7-440B-A5BC-A179218CA584}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D81DD08B-A1D7-440B-A5BC-A179218CA584}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D81DD08B-A1D7-440B-A5BC-A179218CA584}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D81DD08B-A1D7-440B-A5BC-A179218CA584}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
