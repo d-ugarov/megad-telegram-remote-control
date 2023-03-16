@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <LangVersion>default</LangVersion>
+        <AssemblyName>SmartHome.Integrations.MegaD</AssemblyName>
+        <RootNamespace>SmartHome.Integrations.MegaD</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\SmartHome.Common\SmartHome.Common.csproj" />
+    </ItemGroup>
+
+</Project>

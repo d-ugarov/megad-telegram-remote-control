@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <LangVersion>default</LangVersion>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="NLog" Version="5.1.2" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Folder Include="Infrastructure" />
+    </ItemGroup>
+
+</Project>
