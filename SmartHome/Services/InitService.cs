@@ -1,4 +1,5 @@
 ﻿using MegaDTelegramRemoteControl.Services.Interfaces;
+using SmartHome.Common.Interfaces;
 using System.Threading.Tasks;
 
 namespace MegaDTelegramRemoteControl.Services;
@@ -19,7 +20,7 @@ public class InitService : IWarmupCacheService
         if (isPrimaryCache || IsCacheWarmedUp)
             return;
 
-        await botService.InitBotAsync();
+        await botService.InitAsync();
         IsCacheWarmedUp = true;
     }
 }

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace MegaDTelegramRemoteControl.Infrastructure.Configurations;
+namespace SmartHome.Bot.Telegram.Configurations;
 
-public record TelegramConfig
+internal record TelegramConfig
 {
     public string BotAccessToken { get; init; } = null!;
 

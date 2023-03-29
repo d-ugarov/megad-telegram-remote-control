@@ -1,24 +1,25 @@
-﻿using MegaDTelegramRemoteControl.Models;
-using MegaDTelegramRemoteControl.Models.Device;
+﻿using MegaDTelegramRemoteControl.Models.Device;
 using MegaDTelegramRemoteControl.Services.Interfaces;
 using Microsoft.Extensions.Logging;
+using SmartHome.Common.Interfaces;
+using SmartHome.Common.Models.Bot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Location = MegaDTelegramRemoteControl.Models.Device.Location;
 
-namespace MegaDTelegramRemoteControl.Services.TelegramServices;
+namespace SmartHome.Services;
 
-public class TelegramBotHandler : IBotHandler
+public class BotHandler : IBotHandler
 {
     private readonly IHomeService homeService;
     private readonly IDeviceConnector deviceConnector;
-    private readonly ILogger<TelegramBotHandler> logger;
+    private readonly ILogger<BotHandler> logger;
 
-    public TelegramBotHandler(IHomeService homeService,
+    public BotHandler(IHomeService homeService,
         IDeviceConnector deviceConnector,
-        ILogger<TelegramBotHandler> logger)
+        ILogger<BotHandler> logger)
     {
         this.homeService = homeService;
         this.deviceConnector = deviceConnector;
@@ -43,7 +44,7 @@ public class TelegramBotHandler : IBotHandler
                      {
                          Text = "Dashboard",
                          Buttons = homeService.Locations
-                                             .Select(x => new ButtonItem
+                                             .Select(x => new BotMenuButton
                                                           {
                                                               ActionId = x.Id,
                                                               Name = x.Name,
@@ -70,7 +71,7 @@ public class TelegramBotHandler : IBotHandler
                 {
                     logger.LogTrace($"[BotHandler] Call: {location.Name} -> {item.Port.Name}");
 
-                    await deviceConnector.InvokePortActionAsync(item.Port, DevicePortAction.CommandSWDefault);
+                    await deviceConnector.InvokePortActionAsync(item.Device, item.Port, DevicePortAction.CommandSWDefault);
 
                     return await CreateLocationPageAsync(location);
                 }
@@ -123,7 +124,7 @@ public class TelegramBotHandler : IBotHandler
 
         foreach (var subLocation in location.SubLocations)
         {
-            result.Buttons.Add(new ButtonItem
+            result.Buttons.Add(new BotMenuButton
                                {
                                    ActionId = subLocation.Id,
                                    Name = $"{subLocation.Name} ▶",
@@ -136,7 +137,7 @@ public class TelegramBotHandler : IBotHandler
         {
             var status = await GetPortStatusAsync(devicesStatuses, item.Port);
 
-            result.Buttons.Add(new ButtonItem
+            result.Buttons.Add(new BotMenuButton
                                {
                                    ActionId = item.ActionId,
                                    Name = status != null
@@ -155,7 +156,7 @@ public class TelegramBotHandler : IBotHandler
                 {
                     case LocationConditionType.PortOutCurrentStatus when status?.Status.InOutSwStatus == condition.Status:
                     {
-                        result.Buttons.Add(new ButtonItem
+                        result.Buttons.Add(new BotMenuButton
                                            {
                                                ActionId = item.ActionId,
                                                Name = $"{status} {item.FormattedName}",
@@ -175,7 +176,7 @@ public class TelegramBotHandler : IBotHandler
     {
         if (!devicesStatuses.TryGetValue(port.Device.Id, out var statuses))
         {
-            var deviceStatuses = await deviceConnector.GetDevicePortsStatusesAsync(port.Device);
+            var deviceStatuses = await deviceConnector.GetPortsStatusesAsync(port.Device);
             
             statuses = deviceStatuses.IsSuccess
                 ? deviceStatuses.Data!
@@ -191,7 +192,7 @@ public class TelegramBotHandler : IBotHandler
     {
         if (location.Parent != null)
         {
-            menu.FooterButtons.Add(new ButtonItem
+            menu.FooterButtons.Add(new BotMenuButton
                                    {
                                        ActionId = location.Parent.Id,
                                        Name = "↩ Back",
@@ -199,7 +200,7 @@ public class TelegramBotHandler : IBotHandler
                                    });
         }
 
-        menu.FooterButtons.Add(new ButtonItem
+        menu.FooterButtons.Add(new BotMenuButton
                                {
                                    ActionId = Guid.NewGuid().ToString(),
                                    Name = "🔼 Dashboard",

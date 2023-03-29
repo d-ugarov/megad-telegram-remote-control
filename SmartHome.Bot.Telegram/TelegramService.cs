@@ -1,9 +1,9 @@
-﻿using MegaDTelegramRemoteControl.Infrastructure.Configurations;
-using MegaDTelegramRemoteControl.Models;
-using MegaDTelegramRemoteControl.Services.Interfaces;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SmartHome.Bot.Telegram.Configurations;
 using SmartHome.Common.Infrastructure.Models;
+using SmartHome.Common.Interfaces;
+using SmartHome.Common.Models.Bot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,28 +14,28 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace MegaDTelegramRemoteControl.Services.TelegramServices;
+namespace SmartHome.Bot.Telegram;
 
-public class TelegramBotService : IBotService
+internal class TelegramService : IBotService
 {
     private readonly TelegramConfig telegramConfig;
     private TelegramBotClient bot = null!;
 
     private readonly IBotHandler botHandler;
-    private readonly ILogger<TelegramBotService> logger;
+    private readonly ILogger<TelegramService> logger;
 
     private bool isInitialized;
 
-    public TelegramBotService(IOptions<TelegramConfig> telegramConfig,
+    public TelegramService(IOptions<TelegramConfig> telegramConfig,
         IBotHandler botHandler,
-        ILogger<TelegramBotService> logger)
+        ILogger<TelegramService> logger)
     {
         this.telegramConfig = telegramConfig.Value;
         this.botHandler = botHandler;
         this.logger = logger;
     }
 
-    public Task InitBotAsync()
+    public Task InitAsync()
     {
         return InvokeOperations.InvokeOperationAsync(async () =>
         {
@@ -52,8 +52,7 @@ public class TelegramBotService : IBotService
                 receiverOptions: new()
                                  {
                                      AllowedUpdates = Array.Empty<UpdateType>(),
-                                 }
-            );
+                                 });
 
             await bot.SetMyCommandsAsync(new List<BotCommand>
                                          {
