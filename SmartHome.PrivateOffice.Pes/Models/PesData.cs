@@ -1,15 +1,13 @@
-﻿using System.Collections.Generic;
+﻿namespace SmartHome.PrivateOffice.Pes.Models;
 
-namespace MegaDTelegramRemoteControl.Models.PES;
-
-public record PesData
+internal record PesData
 {
     public PesDataBalanceDetails BalanceDetails { get; init; } = new();
     public PesDataIndicationInfo IndicationInfo { get; init; } = new();
     public PesDataLastPaymentInfo LastPaymentInfo { get; init; } = new();
 }
 
-public record PesDataBalanceDetails
+internal record PesDataBalanceDetails
 {
     public decimal Balance { get; init; }
     public string BillDate { get; init; } = "";
@@ -24,7 +22,7 @@ public record PesDataBalanceDetails
     public decimal ToPay { get; init; }
 }
 
-public record PesDataSubServiceBalances
+internal record PesDataSubServiceBalances
 {
     public decimal Amount { get; init; }
     public decimal AmountToPay { get; init; }
@@ -37,7 +35,7 @@ public record PesDataSubServiceBalances
     public string SubServiceName { get; init; } = "";
 }
 
-public record PesDataIndicationInfo
+internal record PesDataIndicationInfo
 {
     public List<PesDisplayKey> AccountDisplayKey = new();
     public string declareType { get; init; } = "";
@@ -48,7 +46,7 @@ public record PesDataIndicationInfo
     public List<PesDataSubService> SubServices { get; init; } = new();
 }
 
-public record PesDataSubService
+internal record PesDataSubService
 {
     public string Date { get; init; } = "";
     public List<PesDutyParameters> DutyParameters { get; init; } = new();
@@ -64,7 +62,7 @@ public record PesDataSubService
     public decimal Value { get; init; }
 }
 
-public record PesDataLastPaymentInfo
+internal record PesDataLastPaymentInfo
 {
     public int PaymentsCount { get; init; }
     public int TotalSum { get; init; }

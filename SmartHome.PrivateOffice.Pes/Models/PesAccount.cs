@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
+﻿namespace SmartHome.PrivateOffice.Pes.Models;
 
-namespace MegaDTelegramRemoteControl.Models.PES;
-
-public record PesAccount
+internal record PesAccount
 {
     public int AccountId { get; init; }
     public int ProviderId { get; init; }

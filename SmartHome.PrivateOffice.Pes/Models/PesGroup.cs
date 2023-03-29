@@ -1,6 +1,6 @@
-﻿namespace MegaDTelegramRemoteControl.Models.PES;
+﻿namespace SmartHome.PrivateOffice.Pes.Models;
 
-public record PesGroup
+internal record PesGroup
 {
     public int Id { get; init; }
     public string Name { get; init; } = "";

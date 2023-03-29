@@ -1,22 +1,17 @@
-﻿using MegaDTelegramRemoteControl.Infrastructure.Configurations;
-using MegaDTelegramRemoteControl.Infrastructure.Helpers;
-using MegaDTelegramRemoteControl.Models.AntiCaptcha;
-using MegaDTelegramRemoteControl.Models.PES;
-using MegaDTelegramRemoteControl.Services.Interfaces;
-using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using SmartHome.Common.Infrastructure.Helpers;
 using SmartHome.Common.Infrastructure.Models;
-using System;
-using System.Collections.Generic;
+using SmartHome.Common.Interfaces;
+using SmartHome.Common.Models.AntiCaptcha;
+using SmartHome.PrivateOffice.Pes.Configurations;
+using SmartHome.PrivateOffice.Pes.Models;
 using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
 
-namespace MegaDTelegramRemoteControl.Services.PrivateOffices.PES;
+namespace SmartHome.PrivateOffice.Pes;
 
-public class PesConnector : IPesConnector
+public class PesConnector
 {
     private readonly HttpClient httpClient;
     private readonly IMemoryCache memoryCache;
@@ -43,7 +38,7 @@ public class PesConnector : IPesConnector
         this.pesCommonConfig = pesConfig.Value.CommonConfig;
     }
 
-    public Task<OperationResult<List<PesGroup>>> GetGroupsAsync(PesClientConfig config)
+    internal Task<OperationResult<List<PesGroup>>> GetGroupsAsync(PesClientConfig config)
     {
         return InvokeOperations.InvokeOperationAsync(() =>
         {
@@ -52,7 +47,7 @@ public class PesConnector : IPesConnector
         });
     }
 
-    public Task<OperationResult<List<PesAccount>>> GetAccountsAsync(PesClientConfig config, int groupId)
+    internal Task<OperationResult<List<PesAccount>>> GetAccountsAsync(PesClientConfig config, int groupId)
     {
         return InvokeOperations.InvokeOperationAsync(() =>
         {
@@ -61,7 +56,7 @@ public class PesConnector : IPesConnector
         });
     }
 
-    public Task<OperationResult<PesData>> GetAccountDataAsync(PesClientConfig config, int accountId)
+    internal Task<OperationResult<PesData>> GetAccountDataAsync(PesClientConfig config, int accountId)
     {
         return InvokeOperations.InvokeOperationAsync(() =>
         {
@@ -122,10 +117,11 @@ public class PesConnector : IPesConnector
         
         if (!string.IsNullOrEmpty(pesCommonConfig.CaptchaWebsiteKey))
         {
-            var captchaResult = await antiCaptchaService.SolveReCaptchaV2Async(
-                new ReCaptchaV2Task(pesBaseUrl, pesCommonConfig.CaptchaWebsiteKey, true));
-            if (captchaResult.IsSuccess)
-                captchaCode = captchaResult.Data!.GRecaptchaResponse;
+            var captchaResult = await antiCaptchaService.SolveCaptchaAsync(
+                new(AntiCaptchaType.ReCaptchaV2,
+                    ReCaptchaV2: new(pesBaseUrl, pesCommonConfig.CaptchaWebsiteKey, true)));
+            if (captchaResult.IsSuccess && captchaResult.Data!.ReCaptchaV2 != null)
+                captchaCode = captchaResult.Data!.ReCaptchaV2.GRecaptchaResponse;
         }
 
         var body = new

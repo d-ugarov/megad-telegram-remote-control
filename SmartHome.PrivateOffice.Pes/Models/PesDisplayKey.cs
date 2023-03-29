@@ -1,6 +1,6 @@
-namespace MegaDTelegramRemoteControl.Models.PES;
+namespace SmartHome.PrivateOffice.Pes.Models;
 
-public record PesDisplayKey
+internal record PesDisplayKey
 {
     public string? FieldName { get; init; }
     public string? FieldCode { get; init; }

@@ -1,6 +1,6 @@
-﻿namespace MegaDTelegramRemoteControl.Infrastructure.Configurations;
+﻿namespace SmartHome.Common.AntiCaptcha.Configurations;
 
-public class AntiCaptchaConfig
+internal class AntiCaptchaConfig
 {
     public string ApiKey { get; set; } = "";
     public int MaxSolveDurationInSeconds { get; set; } = 30;

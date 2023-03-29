@@ -1,6 +1,6 @@
-﻿namespace MegaDTelegramRemoteControl.Models.AntiCaptcha;
+﻿namespace SmartHome.Common.AntiCaptcha.Models;
 
-public record CaptchaGetTaskResponse : ICaptchaResponse
+internal record CaptchaGetTaskResponse : ICaptchaResponse
 {
     public int ErrorId { get; init; }
     public string? ErrorCode { get; init; }
@@ -14,7 +14,7 @@ public record CaptchaGetTaskResponse : ICaptchaResponse
     public int SolveCount { get; init; }
 }
 
-public enum CaptchaGetTaskResponseStatus
+internal enum CaptchaGetTaskResponseStatus
 {
     Processing,
     Ready,

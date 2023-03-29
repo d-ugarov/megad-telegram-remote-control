@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace MegaDTelegramRemoteControl.Models.AntiCaptcha;
+namespace SmartHome.Common.AntiCaptcha.Models;
 
-public record CaptchaGetTaskRequest : ICaptchaRequest
+internal record CaptchaGetTaskRequest : ICaptchaRequest
 {
     [JsonPropertyName("clientKey")]
     public string ClientKey { get; init; } = "";

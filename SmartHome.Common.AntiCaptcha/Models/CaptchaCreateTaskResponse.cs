@@ -1,6 +1,6 @@
-﻿namespace MegaDTelegramRemoteControl.Models.AntiCaptcha;
+﻿namespace SmartHome.Common.AntiCaptcha.Models;
 
-public record CaptchaCreateTaskResponse : ICaptchaResponse
+internal record CaptchaCreateTaskResponse : ICaptchaResponse
 {
     public int ErrorId { get; init; }
     public string? ErrorCode { get; init; }

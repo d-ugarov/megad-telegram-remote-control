@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace MegaDTelegramRemoteControl.Models.PES;
+namespace SmartHome.PrivateOffice.Pes.Models;
 
-public record PesAuthResult
+internal record PesAuthResult
 {
     [JsonPropertyName("access_token")]
     public string Token { get; init; } = "";

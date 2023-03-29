@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace MegaDTelegramRemoteControl.Infrastructure.Configurations;
+﻿namespace SmartHome.PrivateOffice.Pes.Configurations;
 
 public class PesConfig
 {
