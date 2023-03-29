@@ -2,9 +2,15 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHome", "SmartHome\SmartHome.csproj", "{1211943F-2468-4F52-AD45-623A54C38F46}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHome.Integrations.MegaD", "SmartHome.Integrations.MegaD\SmartHome.Integrations.MegaD.csproj", "{F1844488-F009-48B9-98AD-676A35491A32}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHome.Device.MegaD", "SmartHome.Device.MegaD\SmartHome.Device.MegaD.csproj", "{F1844488-F009-48B9-98AD-676A35491A32}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHome.Common", "SmartHome.Common\SmartHome.Common.csproj", "{D81DD08B-A1D7-440B-A5BC-A179218CA584}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHome.Bot.Telegram", "SmartHome.Bot.Telegram\SmartHome.Bot.Telegram.csproj", "{FB3010C5-3CFC-4FD3-8696-1505FDE55B9B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHome.Common.AntiCaptcha", "SmartHome.Common.AntiCaptcha\SmartHome.Common.AntiCaptcha.csproj", "{5A759E05-ACE3-43CF-A34D-9E1F33AFBBE4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHome.PrivateOffice.Pes", "SmartHome.PrivateOffice.Pes\SmartHome.PrivateOffice.Pes.csproj", "{68F032C7-A137-4590-9F74-1D3D56A7B997}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +30,17 @@ Global
 		{D81DD08B-A1D7-440B-A5BC-A179218CA584}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D81DD08B-A1D7-440B-A5BC-A179218CA584}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D81DD08B-A1D7-440B-A5BC-A179218CA584}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB3010C5-3CFC-4FD3-8696-1505FDE55B9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB3010C5-3CFC-4FD3-8696-1505FDE55B9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB3010C5-3CFC-4FD3-8696-1505FDE55B9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB3010C5-3CFC-4FD3-8696-1505FDE55B9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A759E05-ACE3-43CF-A34D-9E1F33AFBBE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A759E05-ACE3-43CF-A34D-9E1F33AFBBE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A759E05-ACE3-43CF-A34D-9E1F33AFBBE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A759E05-ACE3-43CF-A34D-9E1F33AFBBE4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68F032C7-A137-4590-9F74-1D3D56A7B997}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68F032C7-A137-4590-9F74-1D3D56A7B997}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68F032C7-A137-4590-9F74-1D3D56A7B997}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68F032C7-A137-4590-9F74-1D3D56A7B997}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -1,10 +1,9 @@
 ﻿using SmartHome.Common.Models.Device;
 using SmartHome.Common.Models.Device.Enums;
-using System;
 
-namespace SmartHome.Integrations.MegaD.CommandParsers;
+namespace SmartHome.Device.MegaD.CommandParsers;
 
-internal class OutSwStatusParser : IStatusParser
+internal class StatusParserOutSw : IStatusParser
 {
     public DevicePortInfo Parse(IDevicePort devicePort, string portStatusRaw)
     {

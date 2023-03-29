@@ -3,14 +3,10 @@ using SmartHome.Common.Infrastructure.Models;
 using SmartHome.Common.Interfaces;
 using SmartHome.Common.Models.Device;
 using SmartHome.Common.Models.Device.Enums;
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading.Tasks;
 
-namespace SmartHome.Integrations.MegaD;
+namespace SmartHome.Device.MegaD;
 
-public class MegaDConnector : IDeviceConnector
+internal class MegaDConnector : IDeviceConnector
 {
     private readonly HttpClient httpClient;
     private readonly IDeviceCommandParser deviceCommandParser;

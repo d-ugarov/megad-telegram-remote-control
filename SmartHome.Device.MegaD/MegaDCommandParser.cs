@@ -1,24 +1,28 @@
 ﻿using SmartHome.Common.Interfaces;
 using SmartHome.Common.Models.Device;
 using SmartHome.Common.Models.Device.Enums;
-using SmartHome.Integrations.MegaD.CommandParsers;
-using System;
-using System.Collections.Generic;
+using SmartHome.Device.MegaD.CommandParsers;
 
-namespace SmartHome.Integrations.MegaD;
+namespace SmartHome.Device.MegaD;
 
-public class MegaDCommandParser : IDeviceCommandParser
+internal class MegaDCommandParser : IDeviceCommandParser
 {
     private static readonly Dictionary<DevicePortOutMode, IStatusParser> parsersOutPorts;
     private static readonly IStatusParser parserInPorts;
+    private static readonly Dictionary<string, DeviceEventType> deviceEventTypes;
 
     static MegaDCommandParser()
     {
         parsersOutPorts = new()
                           {
-                              {DevicePortOutMode.SW, new OutSwStatusParser()}
+                              {DevicePortOutMode.SW, new StatusParserOutSw()}
                           };
-        parserInPorts = new InStatusParser();
+        parserInPorts = new StatusParserIn();
+        deviceEventTypes = new()
+                           {
+                               {"st", DeviceEventType.DeviceStarted},
+                               {"pt", DeviceEventType.PortEvent},
+                           };
     }
 
     #region Events
@@ -67,7 +71,7 @@ public class MegaDCommandParser : IDeviceCommandParser
     {
         foreach (var (key, value) in eventRaw.Items)
         {
-            foreach (var (command, type) in Helpers.DeviceEventTypes)
+            foreach (var (command, type) in deviceEventTypes)
             {
                 if (!key.Equals(command) || !int.TryParse(value, out var intValue))
                     continue;

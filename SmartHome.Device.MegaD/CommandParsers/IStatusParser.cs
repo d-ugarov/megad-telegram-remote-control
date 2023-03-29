@@ -1,6 +1,6 @@
 ﻿using SmartHome.Common.Models.Device;
 
-namespace SmartHome.Integrations.MegaD.CommandParsers;
+namespace SmartHome.Device.MegaD.CommandParsers;
 
 internal interface IStatusParser
 {

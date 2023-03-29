@@ -6,15 +6,20 @@ using MegaDTelegramRemoteControl.Models;
 using MegaDTelegramRemoteControl.Services;
 using MegaDTelegramRemoteControl.Services.Interfaces;
 using MegaDTelegramRemoteControl.Services.MegaDServices;
-using MegaDTelegramRemoteControl.Services.PrivateOffices.AntiCaptcha;
-using MegaDTelegramRemoteControl.Services.PrivateOffices.PES;
-using MegaDTelegramRemoteControl.Services.TelegramServices;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog;
 using NLog.Web;
+using SmartHome.Bot.Telegram;
+using SmartHome.Common.AntiCaptcha;
+using SmartHome.Common.Helpers;
+using SmartHome.Common.Interfaces;
+using SmartHome.Device.MegaD;
+using SmartHome.Infrastructure.Helpers;
+using SmartHome.PrivateOffice.Pes;
+using SmartHome.Services;
 using System;
 using System.IO;
 
@@ -28,11 +33,9 @@ try
 
     builder.Host.UseNLog();
     builder.Host.UseContentRoot(Directory.GetCurrentDirectory());
-
     builder.ConfigureKestrel();
     AddSystemServices(builder);
     ConfigureServices(builder);
-    ConfigureOptions(builder);
 
     var app = builder.Build();
 
@@ -71,7 +74,6 @@ void AddSystemServices(WebApplicationBuilder builder)
            })
            .AddApiExplorer()
            .AddDataAnnotationsLocalization()
-           .AddAuthorization()
            .AddDataAnnotations()
            .AddJsonOptions(x =>
            {
@@ -82,14 +84,12 @@ void AddSystemServices(WebApplicationBuilder builder)
 
 void ConfigureServices(WebApplicationBuilder builder)
 {
-    var platformConfig = builder.GetConfigByType<PlatformConfig>() ?? new();
+    builder.ConfigureByType<PlatformConfig>();
 
-    builder.Services.AddSingleton<IBotService, TelegramBotService>();
-    builder.Services.AddTransient<IBotHandler, TelegramBotHandler>();
+    builder.Services.AddTransient<IBotHandler, BotHandler>();
     builder.Services.AddTransient<IMegaDEventsHandler, MegaDEventsHandler>();
     builder.Services.AddTransient<IHomeProcessor, HomeProcessor>();
     builder.Services.AddSingleton<IWarmupCacheService, InitService>();
-    builder.Services.AddTransient<IDeviceCommandParser, MegaDCommandParser>();
 
     var homeConfig = CreateHomeConfig(builder);
     logger.Info(homeConfig.ToString());
@@ -99,23 +99,14 @@ void ConfigureServices(WebApplicationBuilder builder)
             homeConfig,
             x.GetRequiredService<ILogger<HomeService>>()));
 
-    builder.Services.AddHttpClient<IDeviceConnector, MegaDConnector>();
+    builder.AddBotTelegram();
+    builder.AddDeviceMegaD();
 
-    builder.Services.AddHttpClient<IAntiCaptchaService, AntiCaptchaService>();
+    builder.AddAntiCaptcha();
+    builder.AddPrivateOfficePes();
 
-    builder.Services.AddTransient<IPesService, PesService>();
-    builder.Services.AddHttpClient<IPesConnector, PesConnector>();
-
-    builder.Services.AddHostedService<JobScheduler>();
-}
-
-void ConfigureOptions(WebApplicationBuilder builder)
-{
-    builder.ConfigureByType<PlatformConfig>();
-    builder.ConfigureByType<TelegramConfig>();
     builder.ConfigureByType<JobSchedulerConfig>();
-    builder.ConfigureByType<PesConfig>();
-    builder.ConfigureByType<AntiCaptchaConfig>();
+    builder.Services.AddHostedService<JobScheduler>();
 }
 
 HomeConfig CreateHomeConfig(WebApplicationBuilder builder)
